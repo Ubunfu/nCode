@@ -11,6 +11,38 @@
 
   </head>
   <body>
+    <header>
+      <!-- Navigation stuff -->
+      <section class="nav-type">
+        <!-- <button type="button" name="base64">Base64</button>
+        <button type="button" name="base64">JWT</button>
+        <button type="button" name="base64">Certificate</button> -->
+        <label for="types">nCoder: </label>
+        <select id="selector-types">
+          <option value="base64">Base64</option>
+          <option value="jwt">JWT</option>
+          <option value="certificate">Certificate</option>
+        </select>
+      </section>
+    </header>
+
+    <main>
+      <section class="input">
+        <textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea>
+      </section>
+
+      <section class="output">
+        <!-- <div class="output-field" id="output-field">
+
+        </div> -->
+        <textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>
+      </section>
+
+      <section class="input-buttons">
+        <button type="button" name="encode" class="btns-ncode" id="btn-encode">Encode</button>
+        <button type="button" name="decode" id="btn-decode" class="btns-ncode">Decode</button>
+      </section>
+    </main>
 
   </body>
 </html>
