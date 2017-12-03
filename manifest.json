@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "name": "nCode",
+  "version": "0.1",
+  "description": "Awesome encoding and decoding tool targeted at developers!",
+  "icons": {
+    "19": "img/icon19.png"
+  },
+  "browser_action": {
+    "default_icon": "img/icon19.png",
+    "default_popup": "popup.html",
+    "default_title": "Let's nCode!"
+  },
+  "author": "Ryan Allen",
+  "permissions": [
+  ]
+}
