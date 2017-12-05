@@ -34,7 +34,7 @@ function nCoderJWT(action, input) {
   var jwt = require('jwt-simple');
   var secret = 'secret';
 
-  console.log(secret);
+  console.log("Secret: " + secret);
 
   switch (action) {
     case 'encode':
@@ -96,10 +96,48 @@ function nCode(action, type, input) {
   return output;
 }
 
+/**
+ * renderUI
+ * Renders the UI depending on what the selected nCoder is
+ *
+ * @param {string} nCoder The given nCoder setting.
+ * @param {function} callback Callback for when UI is rendered.
+ */
+function renderUI(nCoder, callback) {
+  var sectInput = document.getElementById('section-input');
+  var sectOutput = document.getElementById('section-output');
+
+    switch (nCoder) {
+      case 'base64':
+        console.log("set base64");
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea>';
+        sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
+        break;
+      case 'jwt':
+        console.log("set base64");
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" placeholder="Secret?">';
+        sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
+        break;
+      default:
+
+    }
+
+  // Ring Ring, UI is done :P
+  callback();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
   var btnEncode = document.getElementById('btn-encode');
   var btnDecode = document.getElementById('btn-decode');
+  var selType = document.getElementById('selector-types');
+
+  selType.addEventListener('change', () => {
+    // We changed the nCoder, re-render the UI!
+    renderUI(selType.value, () => {
+      console.log("Done Rendering! :]");
+    })
+  });
 
   btnEncode.addEventListener('click', () => {
     var type = document.getElementById('selector-types').value;
