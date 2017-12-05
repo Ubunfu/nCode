@@ -1,0 +1,17 @@
+{
+  "name": "ncode",
+  "version": "0.1.0",
+  "description": "Encoding and decoding tool for web developers.",
+  "dependencies": {
+    "jwt-simple": "^0.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ubunfu/nCode.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/Ubunfu/nCode/issues"
+  },
+  "homepage": "https://github.com/Ubunfu/nCode#readme"
+}
