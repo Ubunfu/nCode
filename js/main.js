@@ -28,10 +28,16 @@ function nCoderBase64(action, input) {
   *
   * @param {string} action The action to perform [encode/decode].
   * @param {string} input The string to transform.
+  * @param {string} userSecret JWT secret.
   */
-function nCoderJWT(action, input) {
+function nCoderJWT(action, input, userSecret) {
   var jwt = require('jwt-simple');
   var secret = 'secret';
+
+  // Override secret if necessary
+  if (userSecret != null) {
+    secret = userSecret;
+  }
 
   console.log("Secret: " + secret);
 
@@ -81,8 +87,8 @@ function nCode(action, type, input) {
       var output = nCoderBase64(action, input);
       break;
     case 'jwt':
-      console.log(action + "JWT!");
-      var output = nCoderJWT(action, input);
+      var secret = document.getElementById('jwt-secret').value;
+      var output = nCoderJWT(action, input, secret);
       break;
     case 'certificate':
       console.log(action + "certificate!");
@@ -114,7 +120,7 @@ function renderUI(nCoder, callback) {
         break;
       case 'jwt':
         console.log("set base64");
-        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" placeholder="Secret?">';
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" id="jwt-secret" placeholder="Secret?">';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
         break;
       default:
@@ -127,9 +133,17 @@ function renderUI(nCoder, callback) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
+
   var btnEncode = document.getElementById('btn-encode');
   var btnDecode = document.getElementById('btn-decode');
   var selType = document.getElementById('selector-types');
+
+  // Don't wait until I change the box, just run the
+  // render function right away.  Don't have to hardcode an initial
+  // value in popup HTML.
+  renderUI(selType.value, () => {
+    console.log("Done Rendering! :]");
+  })
 
   selType.addEventListener('change', () => {
     // We changed the nCoder, re-render the UI!
