@@ -1,9 +1,11 @@
 {
   "name": "ncode",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Encoding and decoding tool for web developers.",
   "dependencies": {
-    "jwt-simple": "^0.5.1"
+    "jwt-simple": "^0.5.1",
+    "browserify": "^14.5.0",
+    "gulp": "^3.9.1"
   },
   "repository": {
     "type": "git",
