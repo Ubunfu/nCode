@@ -6,15 +6,17 @@
  * @param {string} input The string to transform.
  */
 function nCoderBase64(action, input) {
+  var output;
+
   switch (action) {
     case 'encode':
-      var output = btoa(input);
+      output = btoa(input);
       break;
     case 'decode':
-      var output = atob(input);
+      output = atob(input);
       break;
     default:
-      var output = '[ERROR] Invalid action.';
+      output = '[ERROR] Invalid action.';
       console.log('[ERROR] Invalid action.');
   }
 
@@ -33,6 +35,7 @@ function nCoderBase64(action, input) {
 function nCoderJWT(action, input, userSecret) {
   var jwt = require('jwt-simple');
   var secret = 'secret';
+  var ouptut;
 
   // Override secret if necessary
   if (userSecret != null) {
@@ -45,17 +48,17 @@ function nCoderJWT(action, input, userSecret) {
     case 'encode':
       // This gives us back a JWT
       console.log("Plaintext: " + input);
-      var output = jwt.encode(input, secret);
+      output = jwt.encode(input, secret);
       console.log("Encoded JWT: " + output);
       break;
     case 'decode':
       // This gives us back a JSON payload
       console.log("Encoded JWT: " + input);
-      var output = jwt.decode(input, secret);
+      output = jwt.decode(input, secret);
       console.log("Plaintext: " + output);
       break;
     default:
-      var output = '[ERROR] Invalid action.';
+      output = '[ERROR] Invalid action.';
       console.log('[ERROR] Invalid action.');
   }
 
@@ -82,13 +85,16 @@ function displayOutput(output) {
   * @param {string} input Input to transform.
   */
 function nCode(action, type, input) {
+  var secret;
+  var output;
+
   switch (type) {
     case 'base64':
-      var output = nCoderBase64(action, input);
+      output = nCoderBase64(action, input);
       break;
     case 'jwt':
-      var secret = document.getElementById('jwt-secret').value;
-      var output = nCoderJWT(action, input, secret);
+      secret = document.getElementById('jwt-secret').value;
+      output = nCoderJWT(action, input, secret);
       break;
     case 'certificate':
       console.log(action + "certificate!");
@@ -132,8 +138,6 @@ function renderUI(nCoder, callback) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
-
   var btnEncode = document.getElementById('btn-encode');
   var btnDecode = document.getElementById('btn-decode');
   var selType = document.getElementById('selector-types');
@@ -143,13 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // value in popup HTML.
   renderUI(selType.value, () => {
     console.log("Done Rendering! :]");
-  })
+  });
 
   selType.addEventListener('change', () => {
     // We changed the nCoder, re-render the UI!
     renderUI(selType.value, () => {
       console.log("Done Rendering! :]");
-    })
+    });
   });
 
   btnEncode.addEventListener('click', () => {
@@ -165,7 +169,5 @@ document.addEventListener('DOMContentLoaded', () => {
     var output = nCode('decode', type, input);
     displayOutput(output);
   });
-
-
 
 });
