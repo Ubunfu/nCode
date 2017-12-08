@@ -3,15 +3,20 @@
   "version": "0.2.0",
   "description": "Encoding and decoding tool for web developers.",
   "dependencies": {
-    "jwt-simple": "^0.5.1",
+    "jwt-simple": "^0.5.1"
+  },
+  "devDependencies": {
     "browserify": "^14.5.0",
-    "gulp": "^3.9.1"
+    "eslint": "^4.12.1",
+    "eslint-plugin-react": "^7.5.1",
+    "gulp": "^3.9.1",
+    "vinyl-source-stream": "^1.1.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ubunfu/nCode.git"
   },
-  "author": "",
+  "author": "Ryan Allen <rallen3882@gmail.com>",
   "bugs": {
     "url": "https://github.com/Ubunfu/nCode/issues"
   },
