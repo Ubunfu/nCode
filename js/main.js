@@ -6,25 +6,25 @@
  * @param {string} input The string to transform.
  */
 function nCoderBase64(action, input) {
-  var output;
+    var output;
 
-  switch (action) {
+    switch (action) {
     case 'encode':
-      output = btoa(input);
-      break;
+        output = btoa(input);
+        break;
     case 'decode':
-      output = atob(input);
-      break;
+        output = atob(input);
+        break;
     default:
-      output = '[ERROR] Invalid action.';
-      console.log('[ERROR] Invalid action.');
-  }
+        output = '[ERROR] Invalid action.';
+        console.log('[ERROR] Invalid action.');
+    }
 
-  console.log(output);
-  return output;
- }
+    console.log(output);
+    return output;
+}
 
- /**
+/**
   * JWT nCoder
   * Encodes or decodes a JWT!
   *
@@ -33,50 +33,50 @@ function nCoderBase64(action, input) {
   * @param {string} userSecret JWT secret.
   */
 function nCoderJWT(action, input, userSecret) {
-  var jwt = require('jwt-simple');
-  var secret = 'secret';
-  var ouptut;
-
-  // Override secret if necessary
-  if (userSecret != null) {
-    secret = userSecret;
-  }
-
-  console.log("Secret: " + secret);
-
-  switch (action) {
+    var jwt = require('jwt-simple');
+    var secret = 'secret';
+    var ouptut = '';
+    
+    // Override secret if necessary
+    if (userSecret != null) {
+        secret = userSecret;
+    }
+    
+    console.log('Secret: ' + secret);
+    
+    switch (action) {
     case 'encode':
-      // This gives us back a JWT
-      console.log("Plaintext: " + input);
-      output = jwt.encode(input, secret);
-      console.log("Encoded JWT: " + output);
-      break;
+        // This gives us back a JWT
+        console.log('Plaintext: ' + input);
+        output = jwt.encode(input, secret);
+        console.log('Encoded JWT: ' + output);
+        break;
     case 'decode':
-      // This gives us back a JSON payload
-      console.log("Encoded JWT: " + input);
-      output = jwt.decode(input, secret);
-      console.log("Plaintext: " + output);
-      break;
+        // This gives us back a JSON payload
+        console.log('Encoded JWT: ' + input);
+        output = jwt.decode(input, secret);
+        console.log('Plaintext: ' + output);
+        break;
     default:
-      output = '[ERROR] Invalid action.';
-      console.log('[ERROR] Invalid action.');
-  }
+        output = '[ERROR] Invalid action.';
+        console.log('[ERROR] Invalid action.');
+    }
 
-  return output;
+    return output;
 }
 
- /**
+/**
   * displayOutput
   * Writes the output to the popup! So you can see it! :OO
   *
   * @param {string} output Text to write to the popup
   */
 function displayOutput(output) {
-  var outBox = document.getElementById('output-field');
-  outBox.value = output;
+    var outBox = document.getElementById('output-field');
+    outBox.value = output;
 }
 
- /**
+/**
   * nCode
   * Dispatches a request to the proper nCoder.
   *
@@ -85,26 +85,26 @@ function displayOutput(output) {
   * @param {string} input Input to transform.
   */
 function nCode(action, type, input) {
-  var secret;
-  var output;
+    var secret;
+    var output;
 
-  switch (type) {
+    switch (type) {
     case 'base64':
-      output = nCoderBase64(action, input);
-      break;
+        output = nCoderBase64(action, input);
+        break;
     case 'jwt':
-      secret = document.getElementById('jwt-secret').value;
-      output = nCoderJWT(action, input, secret);
-      break;
+        secret = document.getElementById('jwt-secret').value;
+        output = nCoderJWT(action, input, secret);
+        break;
     case 'certificate':
-      console.log(action + "certificate!");
-      // var output = nCoderCertificate(action, input);
-      break;
+        console.log(action + 'certificate!');
+        // var output = nCoderCertificate(action, input);
+        break;
     default:
-      console.log('[ERROR] Invalid input type.');
-  }
+        console.log('[ERROR] Invalid input type.');
+    }
 
-  return output;
+    return output;
 }
 
 /**
@@ -115,59 +115,59 @@ function nCode(action, type, input) {
  * @param {function} callback Callback for when UI is rendered.
  */
 function renderUI(nCoder, callback) {
-  var sectInput = document.getElementById('section-input');
-  var sectOutput = document.getElementById('section-output');
+    var sectInput = document.getElementById('section-input');
+    var sectOutput = document.getElementById('section-output');
 
     switch (nCoder) {
-      case 'base64':
-        console.log("set base64");
+    case 'base64':
+        console.log('set base64');
         sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea>';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
         break;
-      case 'jwt':
-        console.log("set base64");
+    case 'jwt':
+        console.log('set base64');
         sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" id="jwt-secret" placeholder="Secret?">';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
         break;
-      default:
+    default:
 
     }
 
-  // Ring Ring, UI is done :P
-  callback();
+    // Ring Ring, UI is done :P
+    callback();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  var btnEncode = document.getElementById('btn-encode');
-  var btnDecode = document.getElementById('btn-decode');
-  var selType = document.getElementById('selector-types');
+    var btnEncode = document.getElementById('btn-encode');
+    var btnDecode = document.getElementById('btn-decode');
+    var selType = document.getElementById('selector-types');
 
-  // Don't wait until I change the box, just run the
-  // render function right away.  Don't have to hardcode an initial
-  // value in popup HTML.
-  renderUI(selType.value, () => {
-    console.log("Done Rendering! :]");
-  });
-
-  selType.addEventListener('change', () => {
-    // We changed the nCoder, re-render the UI!
+    // Don't wait until I change the box, just run the
+    // render function right away.  Don't have to hardcode an initial
+    // value in popup HTML.
     renderUI(selType.value, () => {
-      console.log("Done Rendering! :]");
+        console.log('Done Rendering! :]');
     });
-  });
 
-  btnEncode.addEventListener('click', () => {
-    var type = document.getElementById('selector-types').value;
-    var input = document.getElementById('input-field').value;
-    var output = nCode('encode', type, input);
-    displayOutput(output);
-  });
+    selType.addEventListener('change', () => {
+    // We changed the nCoder, re-render the UI!
+        renderUI(selType.value, () => {
+            console.log('Done Rendering! :]');
+        });
+    });
 
-  btnDecode.addEventListener('click', () => {
-    var type = document.getElementById('selector-types').value;
-    var input = document.getElementById('input-field').value;
-    var output = nCode('decode', type, input);
-    displayOutput(output);
-  });
+    btnEncode.addEventListener('click', () => {
+        var type = document.getElementById('selector-types').value;
+        var input = document.getElementById('input-field').value;
+        var output = nCode('encode', type, input);
+        displayOutput(output);
+    });
+
+    btnDecode.addEventListener('click', () => {
+        var type = document.getElementById('selector-types').value;
+        var input = document.getElementById('input-field').value;
+        var output = nCode('decode', type, input);
+        displayOutput(output);
+    });
 
 });
