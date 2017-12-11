@@ -38,11 +38,11 @@ function nCoderJWT(action, input, userSecret) {
     var ouptut;
 
     // Override secret if necessary
-    if (userSecret != null) {
+    if (userSecret) {
         secret = userSecret;
     }
 
-    console.log('Secret: ' + secret);
+    // console.log('Secret: ' + secret);
 
     switch (action) {
     case 'encode':
@@ -69,10 +69,11 @@ function nCoderJWT(action, input, userSecret) {
   * displayOutput
   * Writes the output to the popup! So you can see it! :OO
   *
-  * @param {string} output Text to write to the popup
+  * @param {string} output Output data to write
+  * @param {string} domObj Object to write output data to
   */
-function displayOutput(output) {
-    var outBox = document.getElementById('output-field');
+function displayOutput(output, domObj) {
+    var outBox = document.getElementById(domObj);
     outBox.value = output;
 }
 
@@ -126,7 +127,8 @@ function renderUI(nCoder, callback) {
         break;
     case 'jwt':
         console.log('set base64');
-        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" id="jwt-secret" placeholder="Secret?">';
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?">';
+        // sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?"><select id="selector-jwt-config" class="jwt-config"><option value="hs256">HS256</option><option value="rs256">RS256</option></select>';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
         break;
     default:
@@ -160,14 +162,14 @@ document.addEventListener('DOMContentLoaded', () => {
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
         var output = nCode('encode', type, input);
-        displayOutput(output);
+        displayOutput(output, 'output-field');
     });
 
     btnDecode.addEventListener('click', () => {
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
         var output = nCode('decode', type, input);
-        displayOutput(output);
+        displayOutput(output, 'output-field');
     });
 
 });

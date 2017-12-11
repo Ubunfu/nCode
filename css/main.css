@@ -10,6 +10,10 @@
 }
 
 .input-buttons {
-  margin: 5px 0;
+  margin: 10px 0;
   /*text-align: center;*/
+}
+
+.jwt-config {
+  margin-right: 10px;
 }
