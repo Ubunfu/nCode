@@ -35,15 +35,15 @@ function nCoderBase64(action, input) {
 function nCoderJWT(action, input, userSecret) {
     var jwt = require('jwt-simple');
     var secret = 'secret';
-    var ouptut = '';
-    
+    var ouptut;
+
     // Override secret if necessary
-    if (userSecret != null) {
+    if (userSecret) {
         secret = userSecret;
     }
-    
-    console.log('Secret: ' + secret);
-    
+
+    // console.log('Secret: ' + secret);
+
     switch (action) {
     case 'encode':
         // This gives us back a JWT
@@ -69,11 +69,29 @@ function nCoderJWT(action, input, userSecret) {
   * displayOutput
   * Writes the output to the popup! So you can see it! :OO
   *
-  * @param {string} output Text to write to the popup
+  * @param {string} output Output data to write
+  * @param {string} domObj Object to write output data to
   */
-function displayOutput(output) {
-    var outBox = document.getElementById('output-field');
+function displayOutput(output, domObj) {
+    var outBox = document.getElementById(domObj);
     outBox.value = output;
+}
+
+/**
+  * setUiError
+  * Styles the UI to reflect an error
+  *
+  * @param {boolean} error Should the error be set or not? 
+  * @param {string} domObj Object to style for error
+  */
+function setUiError(error, domObj) {
+    var box = document.getElementById(domObj);
+
+    if (error == true) {
+        box.classList.add('error');
+    } else {
+        box.classList.remove('error');
+    }
 }
 
 /**
@@ -125,8 +143,9 @@ function renderUI(nCoder, callback) {
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
         break;
     case 'jwt':
-        console.log('set base64');
-        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" id="jwt-secret" placeholder="Secret?">';
+        console.log('set jwt');
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?">';
+        // sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?"><select id="selector-jwt-config" class="jwt-config"><option value="hs256">HS256</option><option value="rs256">RS256</option></select>';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
         break;
     default:
@@ -141,6 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
     var btnEncode = document.getElementById('btn-encode');
     var btnDecode = document.getElementById('btn-decode');
     var selType = document.getElementById('selector-types');
+
+
 
     // Don't wait until I change the box, just run the
     // render function right away.  Don't have to hardcode an initial
@@ -157,17 +178,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnEncode.addEventListener('click', () => {
+        setUiError(false, 'output-field'); // Clear error class if set
+
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
-        var output = nCode('encode', type, input);
-        displayOutput(output);
+        
+        try {
+            var output = nCode('encode', type, input);
+        } catch (error) {
+            console.log(error);
+            var output = error;
+            setUiError(true, 'output-field');
+        } finally {
+            displayOutput(output, 'output-field');
+        }
     });
 
     btnDecode.addEventListener('click', () => {
+        setUiError(false, 'output-field'); // Clear error class if set
+
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
-        var output = nCode('decode', type, input);
-        displayOutput(output);
+        
+        try {
+            var output = nCode('decode', type, input);
+        } catch (error) {
+            console.log(error);
+            var output = error;
+            setUiError(true, 'output-field');
+        } finally {
+            displayOutput(output, 'output-field');
+        }
     });
 
 });
