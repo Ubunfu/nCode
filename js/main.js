@@ -78,6 +78,23 @@ function displayOutput(output, domObj) {
 }
 
 /**
+  * setUiError
+  * Styles the UI to reflect an error
+  *
+  * @param {boolean} error Should the error be set or not? 
+  * @param {string} domObj Object to style for error
+  */
+function setUiError(error, domObj) {
+    var box = document.getElementById(domObj);
+
+    if (error == true) {
+        box.classList.add('error');
+    } else {
+        box.classList.remove('error');
+    }
+}
+
+/**
   * nCode
   * Dispatches a request to the proper nCoder.
   *
@@ -126,7 +143,7 @@ function renderUI(nCoder, callback) {
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
         break;
     case 'jwt':
-        console.log('set base64');
+        console.log('set jwt');
         sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?">';
         // sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?"><select id="selector-jwt-config" class="jwt-config"><option value="hs256">HS256</option><option value="rs256">RS256</option></select>';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
@@ -144,6 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
     var btnDecode = document.getElementById('btn-decode');
     var selType = document.getElementById('selector-types');
 
+
+
     // Don't wait until I change the box, just run the
     // render function right away.  Don't have to hardcode an initial
     // value in popup HTML.
@@ -159,17 +178,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnEncode.addEventListener('click', () => {
+        setUiError(false, 'output-field'); // Clear error class if set
+
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
-        var output = nCode('encode', type, input);
-        displayOutput(output, 'output-field');
+        
+        try {
+            var output = nCode('encode', type, input);
+        } catch (error) {
+            console.log(error);
+            var output = error;
+            setUiError(true, 'output-field');
+        } finally {
+            displayOutput(output, 'output-field');
+        }
     });
 
     btnDecode.addEventListener('click', () => {
+        setUiError(false, 'output-field'); // Clear error class if set
+
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
-        var output = nCode('decode', type, input);
-        displayOutput(output, 'output-field');
+        
+        try {
+            var output = nCode('decode', type, input);
+        } catch (error) {
+            console.log(error);
+            var output = error;
+            setUiError(true, 'output-field');
+        } finally {
+            displayOutput(output, 'output-field');
+        }
     });
 
 });

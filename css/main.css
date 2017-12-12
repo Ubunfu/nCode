@@ -17,3 +17,8 @@
 .jwt-config {
   margin-right: 10px;
 }
+
+.error {
+  /* box-shadow: x-offset y-offset blur spread color */
+  box-shadow: 0px 0px 5px 2px red;
+}
