@@ -2,20 +2,29 @@
   margin: 5px 0;
 }
 
-.input-field {
-  margin: 5px 0;
+.input-field, .output-field {
+  resize: none;
 }
-.output-field {
-  margin: 5px 0;
+
+.jwt-config-wrapper {
+
+}
+
+.jwt-config {
+  margin-right: 10px;
+}
+
+.jwt-validate-sig-wrapper {
+  display: inline-block;
+}
+
+.input, .output {
+  margin: 10px 0;
 }
 
 .input-buttons {
   margin: 10px 0;
   /*text-align: center;*/
-}
-
-.jwt-config {
-  margin-right: 10px;
 }
 
 .error {
