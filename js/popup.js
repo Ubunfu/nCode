@@ -32,15 +32,20 @@ function nCoderBase64(action, input) {
   * @param {string} action The action to perform [encode/decode].
   * @param {string} input The string to transform.
   * @param {string} userSecret JWT secret.
+  * @param {boolean} ignoreSig If decoding, ignore signature validation?
   */
-function nCoderJWT(action, input, userSecret) {
+function nCoderJWT(action, input, userSecret, ignoreSig) {
     var jwt = require('jwt-simple');
     var secret = 'secret';
-    var ouptut;
+    // var ouptut;
 
     // Override secret if necessary
     if (userSecret) {
         secret = userSecret;
+    }
+
+    if (!ignoreSig) {
+        ignoreSig = false;
     }
 
     // console.log('Secret: ' + secret);
@@ -49,17 +54,19 @@ function nCoderJWT(action, input, userSecret) {
     case 'encode':
         // This gives us back a JWT
         console.log('Plaintext: ' + input);
-        output = jwt.encode(input, secret);
+        var output = jwt.encode(input, secret);
         console.log('Encoded JWT: ' + output);
         break;
     case 'decode':
         // This gives us back a JSON payload
         console.log('Encoded JWT: ' + input);
-        output = jwt.decode(input, secret);
+
+        // If we have a validateSig flag, use it
+        var output = jwt.decode(input, secret, ignoreSig);
         console.log('Plaintext: ' + output);
         break;
     default:
-        output = '[ERROR] Invalid action.';
+        var output = '[ERROR] Invalid action.';
         console.log('[ERROR] Invalid action.');
     }
 
@@ -104,16 +111,21 @@ function setUiError(error, domObj) {
   * @param {string} input Input to transform.
   */
 function nCode(action, type, input) {
-    var secret;
-    var output;
 
     switch (type) {
     case 'base64':
-        output = nCoderBase64(action, input);
+
+        // Run the base64 nCoder
+        var output = nCoderBase64(action, input);
         break;
     case 'jwt':
-        secret = document.getElementById('jwt-secret').value;
-        output = nCoderJWT(action, input, secret);
+        // Grab extra data we need to work with JWTs
+        var ignoreSig = document.getElementById('jwt-validate-sig').checked;
+        var secret = document.getElementById('jwt-secret').value;
+        console.log('ignoreSig?:' + ignoreSig);
+
+        // Run the JWT nCoder
+        var output = nCoderJWT(action, input, secret, ignoreSig);
         break;
     case 'certificate':
         console.log(action + 'certificate!');
@@ -145,8 +157,9 @@ function renderUI(nCoder, callback) {
         break;
     case 'jwt':
         console.log('set jwt');
-        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?">';
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><div class="jwt-config-wrapper"><input type="text" class="jwt-config" id="jwt-secret" placeholder="secret"/><div class="jwt-validate-sig-wrapper"><input type="checkbox" name="jwt-validate-sig" class="jwt-config" id="jwt-validate-sig"/><label for="jwt-validate-sig">Ignore signature?</label></div></div>';
         // sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?"><select id="selector-jwt-config" class="jwt-config"><option value="hs256">HS256</option><option value="rs256">RS256</option></select>';
+        // sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea><div id="test"></div>';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
         break;
     default:
@@ -168,13 +181,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // render function right away.  Don't have to hardcode an initial
     // value in popup HTML.
     renderUI(selType.value, () => {
-        console.log('Done Rendering! :]');
     });
 
     selType.addEventListener('change', () => {
     // We changed the nCoder, re-render the UI!
         renderUI(selType.value, () => {
-            console.log('Done Rendering! :]');
         });
     });
 
@@ -192,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setUiError(true, 'output-field');
         } finally {
             displayOutput(output, 'output-field');
+            // document.getElementById('test').innerHTML = output;
         }
     });
 
@@ -209,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setUiError(true, 'output-field');
         } finally {
             displayOutput(output, 'output-field');
+            // document.getElementById('test').innerHTML = output;
         }
     });
 
