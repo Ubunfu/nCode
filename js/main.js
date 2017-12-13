@@ -36,7 +36,7 @@ function nCoderBase64(action, input) {
 function nCoderJWT(action, input, userSecret, ignoreSig) {
     var jwt = require('jwt-simple');
     var secret = 'secret';
-    // var ouptut;
+    var ouptut;
 
     // Override secret if necessary
     if (userSecret) {
@@ -53,7 +53,7 @@ function nCoderJWT(action, input, userSecret, ignoreSig) {
     case 'encode':
         // This gives us back a JWT
         console.log('Plaintext: ' + input);
-        var output = jwt.encode(input, secret);
+        output = jwt.encode(input, secret);
         console.log('Encoded JWT: ' + output);
         break;
     case 'decode':
@@ -61,11 +61,11 @@ function nCoderJWT(action, input, userSecret, ignoreSig) {
         console.log('Encoded JWT: ' + input);
 
         // If we have a validateSig flag, use it
-        var output = jwt.decode(input, secret, ignoreSig);
+        output = jwt.decode(input, secret, ignoreSig);
         console.log('Plaintext: ' + output);
         break;
     default:
-        var output = '[ERROR] Invalid action.';
+        output = '[ERROR] Invalid action.';
         console.log('[ERROR] Invalid action.');
     }
 
@@ -156,7 +156,7 @@ function renderUI(nCoder, callback) {
         break;
     case 'jwt':
         console.log('set jwt');
-        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><div class="jwt-config-wrapper"><input type="text" class="jwt-config" id="jwt-secret" placeholder="secret"/><div class="jwt-validate-sig-wrapper"><input type="checkbox" name="jwt-validate-sig" class="jwt-config" id="jwt-validate-sig"/><label for="jwt-validate-sig">Ignore signature?</label></div></div>';
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><div class="jwt-config-wrapper"><input type="text" class="jwt-config" id="jwt-secret" placeholder="secret"/><div class="jwt-validate-sig-wrapper"><input type="checkbox" name="jwt-validate-sig" class="jwt-config" id="jwt-validate-sig" checked/><label for="jwt-validate-sig">Ignore signature?</label></div></div>';
         // sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?"><select id="selector-jwt-config" class="jwt-config"><option value="hs256">HS256</option><option value="rs256">RS256</option></select>';
         // sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea><div id="test"></div>';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
