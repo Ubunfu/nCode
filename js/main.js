@@ -36,7 +36,7 @@ function nCoderBase64(action, input) {
 function nCoderJWT(action, input, userSecret, ignoreSig) {
     var jwt = require('jwt-simple');
     var secret = 'secret';
-    var ouptut;
+    var output;
 
     // Override secret if necessary
     if (userSecret) {
@@ -110,12 +110,13 @@ function setUiError(error, domObj) {
   * @param {string} input Input to transform.
   */
 function nCode(action, type, input) {
+    var output;
 
     switch (type) {
     case 'base64':
 
         // Run the base64 nCoder
-        var output = nCoderBase64(action, input);
+        output = nCoderBase64(action, input);
         break;
     case 'jwt':
         // Grab extra data we need to work with JWTs
@@ -124,7 +125,7 @@ function nCode(action, type, input) {
         console.log('ignoreSig?:' + ignoreSig);
 
         // Run the JWT nCoder
-        var output = nCoderJWT(action, input, secret, ignoreSig);
+        output = nCoderJWT(action, input, secret, ignoreSig);
         break;
     case 'certificate':
         console.log(action + 'certificate!');
