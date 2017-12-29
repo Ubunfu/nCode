@@ -25,6 +25,56 @@ function nCoderBase64(action, input) {
 }
 
 /**
+  * String to JSON
+  * Passively attempts to convert a string to a JSON object.
+  * If it fails, nothing is changed, and no error is thrown.
+  *
+  * @param {string} input Input to convert.
+  */
+function stringToJSON(input) {
+
+    console.log('Attempting to convert input from string to JSON object...');
+    var output;
+
+    try {
+        output = JSON.parse(input);
+        console.log('Result:' + output);
+    } catch (error) {
+        // Swallow the error
+        console.log('It didnt take, but whatever.');
+        output = input;
+    }
+
+    return output;
+    
+}
+
+/**
+  * JSON to String
+  * Passively attempts to convert a JSON object into a string.
+  * If it fails, nothing is changed, and no error is thrown.
+  *
+  * @param {string} input Input to convert.
+  */
+function jsonToString(input) {
+
+    console.log('Attempting to convert input from JSON object to string...');
+    var output;
+
+    try {
+        output = JSON.stringify(input, null, 4);
+        console.log('Result:' + output);
+    } catch (error) {
+        // Swallow the error
+        console.log('It didnt take, but whatever.');
+        output = input;
+    }
+
+    return output;
+    
+}
+
+/**
   * JWT nCoder
   * Encodes or decodes a JWT!
   *
@@ -43,16 +93,19 @@ function nCoderJWT(action, input, userSecret, ignoreSig) {
         secret = userSecret;
     }
 
+    // Ignore the signature if desired
     if (!ignoreSig) {
         ignoreSig = false;
     }
-
-    // console.log('Secret: ' + secret);
 
     switch (action) {
     case 'encode':
         // This gives us back a JWT
         console.log('Plaintext: ' + input);
+
+        // Try to convert the input into a JSON object
+        input = stringToJSON(input);
+
         output = jwt.encode(input, secret);
         console.log('Encoded JWT: ' + output);
         break;
@@ -62,6 +115,10 @@ function nCoderJWT(action, input, userSecret, ignoreSig) {
 
         // If we have a validateSig flag, use it
         output = jwt.decode(input, secret, ignoreSig);
+
+        // Try to convert the decoded JWT into a string
+        output = jsonToString(output);
+
         console.log('Plaintext: ' + output);
         break;
     default:
@@ -212,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
-        
+
         try {
             var output = nCode('decode', type, input);
         } catch (error) {
