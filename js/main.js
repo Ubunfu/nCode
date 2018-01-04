@@ -6,14 +6,16 @@
  * @param {string} input The string to transform.
  */
 function nCoderBase64(action, input) {
+    const utf8 = require('utf8');
+    const base64 = require('base-64');
     var output;
 
     switch (action) {
     case 'encode':
-        output = btoa(input);
+        output = base64.encode(utf8.encode(input));
         break;
     case 'decode':
-        output = atob(input);
+        output = utf8.decode(base64.decode(input));
         break;
     default:
         output = '[ERROR] Invalid action.';

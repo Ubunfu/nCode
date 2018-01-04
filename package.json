@@ -3,7 +3,9 @@
   "version": "0.2.0",
   "description": "Encoding and decoding tool for web developers.",
   "dependencies": {
-    "jwt-simple": "^0.5.1"
+    "base-64": "^0.1.0",
+    "jwt-simple": "^0.5.1",
+    "utf8": "^3.0.0"
   },
   "devDependencies": {
     "browserify": "^14.5.0",
