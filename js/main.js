@@ -20,6 +20,7 @@ function nCoderBase64(action, input) {
     default:
         output = '[ERROR] Invalid action.';
         console.log('[ERROR] Invalid action.');
+        break;
     }
 
     console.log(output);
@@ -126,6 +127,34 @@ function nCoderJWT(action, input, userSecret, ignoreSig) {
     default:
         output = '[ERROR] Invalid action.';
         console.log('[ERROR] Invalid action.');
+        break;
+    }
+
+    return output;
+}
+
+/**
+  * Certificate nCoder
+  * Encodes or decodes a certificate!
+  *
+  * @param {string} action The action to perform [encode/decode].
+  * @param {string} input The string to transform.
+  */
+function nCoderCertificate(action, input) {
+
+    var output;
+    
+    switch (action) {
+    case 'encode':
+        output = 'encode ' + input;
+        break;
+    case 'decode':
+        output = 'decode ' + input;
+        break;
+    default:
+        output = '[ERROR] Invalid action.';
+        console.log('[ERROR] Invalid action.');
+        break;
     }
 
     return output;
@@ -187,8 +216,7 @@ function nCode(action, type, input) {
         output = nCoderJWT(action, input, secret, ignoreSig);
         break;
     case 'certificate':
-        console.log(action + 'certificate!');
-        // var output = nCoderCertificate(action, input);
+        var output = nCoderCertificate(action, input);
         break;
     default:
         console.log('[ERROR] Invalid input type.');
@@ -211,15 +239,19 @@ function renderUI(nCoder, callback) {
     switch (nCoder) {
     case 'base64':
         console.log('set base64');
-        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea>';
-        sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Input"></textarea>';
+        sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output"></textarea>';
         break;
     case 'jwt':
         console.log('set jwt');
-        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><div class="jwt-config-wrapper"><input type="text" class="jwt-config" id="jwt-secret" placeholder="secret"/><div class="jwt-validate-sig-wrapper"><input type="checkbox" name="jwt-validate-sig" class="jwt-config" id="jwt-validate-sig" checked/><label for="jwt-validate-sig">Ignore signature?</label></div></div>';
-        // sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Just paste your input here!"></textarea><input type="text" name="" class="jwt-config" id="jwt-secret" placeholder="Secret?"><select id="selector-jwt-config" class="jwt-config"><option value="hs256">HS256</option><option value="rs256">RS256</option></select>';
-        // sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea><div id="test"></div>';
-        sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output will appear here!"></textarea>';
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Input"></textarea><div class="jwt-config-wrapper"><input type="text" class="jwt-config" id="jwt-secret" placeholder="secret"/><div class="jwt-validate-sig-wrapper"><input type="checkbox" name="jwt-validate-sig" class="jwt-config" id="jwt-validate-sig" checked/><label for="jwt-validate-sig">Ignore signature?</label></div></div>';
+        // sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output"></textarea><div id="test"></div>';
+        sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output"></textarea>';
+        break;
+    case 'certificate':
+        console.log('set certificate');
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Input (PEM)"></textarea>';
+        sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output"></textarea>';
         break;
     default:
 

@@ -5,7 +5,8 @@
   "dependencies": {
     "base-64": "^0.1.0",
     "jwt-simple": "^0.5.1",
-    "utf8": "^3.0.0"
+    "utf8": "^3.0.0",
+    "x509": "^0.3.3"
   },
   "devDependencies": {
     "browserify": "^14.5.0",
