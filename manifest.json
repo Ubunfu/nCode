@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "nCode",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Awesome encoding and decoding tool targeted at developers!",
   "icons": {
     "16": "img/icon-16.png",
