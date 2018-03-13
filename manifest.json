@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "nCode",
   "version": "0.2",
-  "description": "Awesome encoding and decoding tool for developers!",
+  "description": "nCode enables easy conversion between string representations:\n *Plaintext\n *Base-64 Encoded\n *JWT \n\nSupport for certificate decoding coming soon!",
   "icons": {
     "16": "img/icon-16.png",
     "48": "img/icon-48.png",
