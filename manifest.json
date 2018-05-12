@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "nCode",
-  "version": "0.2",
+  "version": "1.0",
   "description": "nCode enables easy conversion between string representations:\n *Plaintext\n *Base-64 Encoded\n *JWT \n\nSupport for certificate decoding coming soon!",
   "icons": {
     "16": "img/icon-16.png",

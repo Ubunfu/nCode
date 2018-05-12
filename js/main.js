@@ -141,7 +141,6 @@ function nCoderJWT(action, input, userSecret, ignoreSig) {
   * @param {string} input The string to transform.
   */
 function nCoderCertificate(action, input) {
-
     var output;
     
     switch (action) {
