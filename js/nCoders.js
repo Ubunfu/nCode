@@ -1,3 +1,5 @@
+var jsonUtils = require('./jsonUtils.js');
+
 /**
  * Base64 nCoder
  * Base64 encodes or decodes a string!
@@ -19,7 +21,7 @@ module.exports.nCoderBase64 = function nCoderBase64(action, input) {
         break;
     default:
         output = '[ERROR] Invalid action.';
-        console.log('[ERROR] Invalid action.');
+        // console.log('[ERROR] Invalid action.');
         break;
     }
 
@@ -54,29 +56,29 @@ module.exports.nCoderJWT = function nCoderJWT(action, input, userSecret, ignoreS
     switch (action) {
     case 'encode':
         // This gives us back a JWT
-        console.log('Plaintext: ' + input);
+        // console.log('Plaintext: ' + input);
 
         // Try to convert the input into a JSON object
-        input = stringToJSON(input);
+        input = jsonUtils.stringToJSON(input);
 
         output = jwt.encode(input, secret);
-        console.log('Encoded JWT: ' + output);
+        // console.log('Encoded JWT: ' + output);
         break;
     case 'decode':
         // This gives us back a JSON payload
-        console.log('Encoded JWT: ' + input);
+        // console.log('Encoded JWT: ' + input);
 
         // If we have a validateSig flag, use it
         output = jwt.decode(input, secret, ignoreSig);
 
         // Try to convert the decoded JWT into a string
-        output = jsonToString(output);
+        output = jsonUtils.jsonToString(output);
 
-        console.log('Plaintext: ' + output);
+        // console.log('Plaintext: ' + output);
         break;
     default:
         output = '[ERROR] Invalid action.';
-        console.log('[ERROR] Invalid action.');
+        // console.log('[ERROR] Invalid action.');
         break;
     }
 
