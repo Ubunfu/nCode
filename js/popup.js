@@ -1,57 +1,28 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
- * Base64 nCoder
- * Base64 encodes or decodes a string!
- *
- * @param {string} action The action to perform [encode/decode].
- * @param {string} input The string to transform.
- */
-function nCoderBase64(action, input) {
-    const utf8 = require('utf8');
-    const base64 = require('base-64');
-    var output;
-
-    switch (action) {
-    case 'encode':
-        output = base64.encode(utf8.encode(input));
-        break;
-    case 'decode':
-        output = utf8.decode(base64.decode(input));
-        break;
-    default:
-        output = '[ERROR] Invalid action.';
-        console.log('[ERROR] Invalid action.');
-        break;
-    }
-
-    console.log(output);
-    return output;
-}
-
-/**
   * String to JSON
   * Passively attempts to convert a string to a JSON object.
   * If it fails, nothing is changed, and no error is thrown.
   *
   * @param {string} input Input to convert.
   */
-function stringToJSON(input) {
+module.exports.stringToJSON = function stringToJSON(input) {
 
-    console.log('Attempting to convert input from string to JSON object...');
+    // console.log('Attempting to convert input from string to JSON object...');
     var output;
 
     try {
         output = JSON.parse(input);
-        console.log('Result:' + output);
+        // console.log('Result:' + output);
     } catch (error) {
         // Swallow the error
-        console.log('It didnt take, but whatever.');
+        // console.log('It didnt take, but whatever.');
         output = input;
     }
 
     return output;
     
-}
+};
 
 /**
   * JSON to String
@@ -60,106 +31,25 @@ function stringToJSON(input) {
   *
   * @param {string} input Input to convert.
   */
-function jsonToString(input) {
+module.exports.jsonToString = function jsonToString(input) {
 
-    console.log('Attempting to convert input from JSON object to string...');
+    // console.log('Attempting to convert input from JSON object to string...');
     var output;
 
     try {
         output = JSON.stringify(input, null, 4);
-        console.log('Result:' + output);
+        // console.log('Result:' + output);
     } catch (error) {
         // Swallow the error
-        console.log('It didnt take, but whatever.');
+        // console.log('It didnt take, but whatever.');
         output = input;
     }
 
     return output;
     
-}
-
-/**
-  * JWT nCoder
-  * Encodes or decodes a JWT!
-  *
-  * @param {string} action The action to perform [encode/decode].
-  * @param {string} input The string to transform.
-  * @param {string} userSecret JWT secret.
-  * @param {boolean} ignoreSig If decoding, ignore signature validation?
-  */
-function nCoderJWT(action, input, userSecret, ignoreSig) {
-    var jwt = require('jwt-simple');
-    var secret = 'secret';
-    var output;
-
-    // Override secret if necessary
-    if (userSecret) {
-        secret = userSecret;
-    }
-
-    // Ignore the signature if desired
-    if (!ignoreSig) {
-        ignoreSig = false;
-    }
-
-    switch (action) {
-    case 'encode':
-        // This gives us back a JWT
-        console.log('Plaintext: ' + input);
-
-        // Try to convert the input into a JSON object
-        input = stringToJSON(input);
-
-        output = jwt.encode(input, secret);
-        console.log('Encoded JWT: ' + output);
-        break;
-    case 'decode':
-        // This gives us back a JSON payload
-        console.log('Encoded JWT: ' + input);
-
-        // If we have a validateSig flag, use it
-        output = jwt.decode(input, secret, ignoreSig);
-
-        // Try to convert the decoded JWT into a string
-        output = jsonToString(output);
-
-        console.log('Plaintext: ' + output);
-        break;
-    default:
-        output = '[ERROR] Invalid action.';
-        console.log('[ERROR] Invalid action.');
-        break;
-    }
-
-    return output;
-}
-
-/**
-  * Certificate nCoder
-  * Encodes or decodes a certificate!
-  *
-  * @param {string} action The action to perform [encode/decode].
-  * @param {string} input The string to transform.
-  */
-function nCoderCertificate(action, input) {
-
-    var output;
-    
-    switch (action) {
-    case 'encode':
-        output = 'encode ' + input;
-        break;
-    case 'decode':
-        output = 'decode ' + input;
-        break;
-    default:
-        output = '[ERROR] Invalid action.';
-        console.log('[ERROR] Invalid action.');
-        break;
-    }
-
-    return output;
-}
+};
+},{}],2:[function(require,module,exports){
+var nCoders = require('./nCoders.js');
 
 /**
   * displayOutput
@@ -198,14 +88,14 @@ function setUiError(error, domObj) {
   * @param {string} type The type of object we're dealing with.
   * @param {string} input Input to transform.
   */
-function nCode(action, type, input) {
+async function nCode(action, type, input) {
     var output;
 
     switch (type) {
     case 'base64':
 
         // Run the base64 nCoder
-        output = nCoderBase64(action, input);
+        output = nCoders.nCoderBase64(action, input);
         break;
     case 'jwt':
         // Grab extra data we need to work with JWTs
@@ -214,10 +104,10 @@ function nCode(action, type, input) {
         console.log('ignoreSig?:' + ignoreSig);
 
         // Run the JWT nCoder
-        output = nCoderJWT(action, input, secret, ignoreSig);
+        output = nCoders.nCoderJWT(action, input, secret, ignoreSig);
         break;
     case 'certificate':
-        var output = nCoderCertificate(action, input);
+        var output = await nCoders.nCoderCertificate(action, input);
         break;
     default:
         console.log('[ERROR] Invalid input type.');
@@ -251,7 +141,7 @@ function renderUI(nCoder, callback) {
         break;
     case 'certificate':
         console.log('set certificate');
-        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Input"></textarea>';
+        sectInput.innerHTML = '<textarea id="input-field" class="input-field" name="input" rows="8" cols="80" placeholder="Input (PEM)"></textarea>';
         sectOutput.innerHTML = '<textarea id="output-field" class="output-field" name="output" rows="8" cols="80" placeholder="Output"></textarea>';
         break;
     default:
@@ -281,14 +171,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    btnEncode.addEventListener('click', () => {
+    btnEncode.addEventListener('click', async () => {
         setUiError(false, 'output-field'); // Clear error class if set
 
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
         
         try {
-            var output = nCode('encode', type, input);
+            var output = await nCode('encode', type, input);
         } catch (error) {
             console.log(error);
             var output = error;
@@ -299,14 +189,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    btnDecode.addEventListener('click', () => {
+    btnDecode.addEventListener('click', async () => {
         setUiError(false, 'output-field'); // Clear error class if set
 
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
 
         try {
-            var output = nCode('decode', type, input);
+            var output = await nCode('decode', type, input);
+            console.log('rootOutput: ' + output);
+            if (JSON.parse(output).errorStatus) {
+                setUiError(true, 'output-field');
+            }
         } catch (error) {
             console.log(error);
             var output = error;
@@ -319,591 +213,161 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-},{"base-64":2,"jwt-simple":3,"utf8":5}],2:[function(require,module,exports){
-(function (global){
-/*! http://mths.be/base64 v0.1.0 by @mathias | MIT license */
-;(function(root) {
-
-	// Detect free variables `exports`.
-	var freeExports = typeof exports == 'object' && exports;
-
-	// Detect free variable `module`.
-	var freeModule = typeof module == 'object' && module &&
-		module.exports == freeExports && module;
-
-	// Detect free variable `global`, from Node.js or Browserified code, and use
-	// it as `root`.
-	var freeGlobal = typeof global == 'object' && global;
-	if (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal) {
-		root = freeGlobal;
-	}
-
-	/*--------------------------------------------------------------------------*/
-
-	var InvalidCharacterError = function(message) {
-		this.message = message;
-	};
-	InvalidCharacterError.prototype = new Error;
-	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-
-	var error = function(message) {
-		// Note: the error messages used throughout this file match those used by
-		// the native `atob`/`btoa` implementation in Chromium.
-		throw new InvalidCharacterError(message);
-	};
-
-	var TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-	// http://whatwg.org/html/common-microsyntaxes.html#space-character
-	var REGEX_SPACE_CHARACTERS = /[\t\n\f\r ]/g;
-
-	// `decode` is designed to be fully compatible with `atob` as described in the
-	// HTML Standard. http://whatwg.org/html/webappapis.html#dom-windowbase64-atob
-	// The optimized base64-decoding algorithm used is based on @atk’s excellent
-	// implementation. https://gist.github.com/atk/1020396
-	var decode = function(input) {
-		input = String(input)
-			.replace(REGEX_SPACE_CHARACTERS, '');
-		var length = input.length;
-		if (length % 4 == 0) {
-			input = input.replace(/==?$/, '');
-			length = input.length;
-		}
-		if (
-			length % 4 == 1 ||
-			// http://whatwg.org/C#alphanumeric-ascii-characters
-			/[^+a-zA-Z0-9/]/.test(input)
-		) {
-			error(
-				'Invalid character: the string to be decoded is not correctly encoded.'
-			);
-		}
-		var bitCounter = 0;
-		var bitStorage;
-		var buffer;
-		var output = '';
-		var position = -1;
-		while (++position < length) {
-			buffer = TABLE.indexOf(input.charAt(position));
-			bitStorage = bitCounter % 4 ? bitStorage * 64 + buffer : buffer;
-			// Unless this is the first of a group of 4 characters…
-			if (bitCounter++ % 4) {
-				// …convert the first 8 bits to a single ASCII character.
-				output += String.fromCharCode(
-					0xFF & bitStorage >> (-2 * bitCounter & 6)
-				);
-			}
-		}
-		return output;
-	};
-
-	// `encode` is designed to be fully compatible with `btoa` as described in the
-	// HTML Standard: http://whatwg.org/html/webappapis.html#dom-windowbase64-btoa
-	var encode = function(input) {
-		input = String(input);
-		if (/[^\0-\xFF]/.test(input)) {
-			// Note: no need to special-case astral symbols here, as surrogates are
-			// matched, and the input is supposed to only contain ASCII anyway.
-			error(
-				'The string to be encoded contains characters outside of the ' +
-				'Latin1 range.'
-			);
-		}
-		var padding = input.length % 3;
-		var output = '';
-		var position = -1;
-		var a;
-		var b;
-		var c;
-		var d;
-		var buffer;
-		// Make sure any padding is handled outside of the loop.
-		var length = input.length - padding;
-
-		while (++position < length) {
-			// Read three bytes, i.e. 24 bits.
-			a = input.charCodeAt(position) << 16;
-			b = input.charCodeAt(++position) << 8;
-			c = input.charCodeAt(++position);
-			buffer = a + b + c;
-			// Turn the 24 bits into four chunks of 6 bits each, and append the
-			// matching character for each of them to the output.
-			output += (
-				TABLE.charAt(buffer >> 18 & 0x3F) +
-				TABLE.charAt(buffer >> 12 & 0x3F) +
-				TABLE.charAt(buffer >> 6 & 0x3F) +
-				TABLE.charAt(buffer & 0x3F)
-			);
-		}
-
-		if (padding == 2) {
-			a = input.charCodeAt(position) << 8;
-			b = input.charCodeAt(++position);
-			buffer = a + b;
-			output += (
-				TABLE.charAt(buffer >> 10) +
-				TABLE.charAt((buffer >> 4) & 0x3F) +
-				TABLE.charAt((buffer << 2) & 0x3F) +
-				'='
-			);
-		} else if (padding == 1) {
-			buffer = input.charCodeAt(position);
-			output += (
-				TABLE.charAt(buffer >> 2) +
-				TABLE.charAt((buffer << 4) & 0x3F) +
-				'=='
-			);
-		}
-
-		return output;
-	};
-
-	var base64 = {
-		'encode': encode,
-		'decode': decode,
-		'version': '0.1.0'
-	};
-
-	// Some AMD build optimizers, like r.js, check for specific condition patterns
-	// like the following:
-	if (
-		typeof define == 'function' &&
-		typeof define.amd == 'object' &&
-		define.amd
-	) {
-		define(function() {
-			return base64;
-		});
-	}	else if (freeExports && !freeExports.nodeType) {
-		if (freeModule) { // in Node.js or RingoJS v0.8.0+
-			freeModule.exports = base64;
-		} else { // in Narwhal or RingoJS v0.7.0-
-			for (var key in base64) {
-				base64.hasOwnProperty(key) && (freeExports[key] = base64[key]);
-			}
-		}
-	} else { // in Rhino or a web browser
-		root.base64 = base64;
-	}
-
-}(this));
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
-module.exports = require('./lib/jwt');
-
-},{"./lib/jwt":4}],4:[function(require,module,exports){
-(function (Buffer){
-/*
- * jwt-simple
- *
- * JSON Web Token encode and decode module for node.js
- *
- * Copyright(c) 2011 Kazuhito Hokamura
- * MIT Licensed
- */
+},{"./nCoders.js":3}],3:[function(require,module,exports){
+var jsonUtils = require('./jsonUtils.js');
 
 /**
- * module dependencies
+ * Base64 nCoder
+ * Base64 encodes or decodes a string!
+ *
+ * @param {string} action The action to perform [encode/decode].
+ * @param {string} input The string to transform.
  */
-var crypto = require('crypto');
+module.exports.nCoderBase64 = function nCoderBase64(action, input) {
+    const utf8 = require('utf8');
+    const base64 = require('base-64');
+    var output;
 
+    switch (action) {
+        case 'encode':
+            output = base64.encode(utf8.encode(input));
+            break;
+        case 'decode':
+            output = utf8.decode(base64.decode(input));
+            break;
+        default:
+            output = '[ERROR] Invalid action.';
+            // console.log('[ERROR] Invalid action.');
+            break;
+    }
 
-/**
- * support algorithm mapping
- */
-var algorithmMap = {
-  HS256: 'sha256',
-  HS384: 'sha384',
-  HS512: 'sha512',
-  RS256: 'RSA-SHA256'
+    // console.log(output);
+    return output;
 };
 
 /**
- * Map algorithm to hmac or sign type, to determine which crypto function to use
- */
-var typeMap = {
-  HS256: 'hmac',
-  HS384: 'hmac',
-  HS512: 'hmac',
-  RS256: 'sign'
-};
+  * JWT nCoder
+  * Encodes or decodes a JWT!
+  *
+  * @param {string} action The action to perform [encode/decode].
+  * @param {string} input The string to transform.
+  * @param {string} userSecret JWT secret.
+  * @param {boolean} ignoreSig If decoding, ignore signature validation?
+  */
+module.exports.nCoderJWT = function nCoderJWT(action, input, userSecret, ignoreSig) {
+    var jwt = require('jwt-simple');
+    var secret = 'secret';
+    var output;
 
-
-/**
- * expose object
- */
-var jwt = module.exports;
-
-
-/**
- * version
- */
-jwt.version = '0.5.1';
-
-/**
- * Decode jwt
- *
- * @param {Object} token
- * @param {String} key
- * @param {Boolean} noVerify
- * @param {String} algorithm
- * @return {Object} payload
- * @api public
- */
-jwt.decode = function jwt_decode(token, key, noVerify, algorithm) {
-  // check token
-  if (!token) {
-    throw new Error('No token supplied');
-  }
-  // check segments
-  var segments = token.split('.');
-  if (segments.length !== 3) {
-    throw new Error('Not enough or too many segments');
-  }
-
-  // All segment should be base64
-  var headerSeg = segments[0];
-  var payloadSeg = segments[1];
-  var signatureSeg = segments[2];
-
-  // base64 decode and parse JSON
-  var header = JSON.parse(base64urlDecode(headerSeg));
-  var payload = JSON.parse(base64urlDecode(payloadSeg));
-
-  if (!noVerify) {
-    var signingMethod = algorithmMap[algorithm || header.alg];
-    var signingType = typeMap[algorithm || header.alg];
-    if (!signingMethod || !signingType) {
-      throw new Error('Algorithm not supported');
+    // Override secret if necessary
+    if (userSecret) {
+        secret = userSecret;
     }
 
-    // verify signature. `sign` will return base64 string.
-    var signingInput = [headerSeg, payloadSeg].join('.');
-    if (!verify(signingInput, key, signingMethod, signingType, signatureSeg)) {
-      throw new Error('Signature verification failed');
+    // Ignore the signature if desired
+    if (!ignoreSig) {
+        ignoreSig = false;
     }
 
-    // Support for nbf and exp claims.
-    // According to the RFC, they should be in seconds.
-    if (payload.nbf && Date.now() < payload.nbf*1000) {
-      throw new Error('Token not yet active');
+    switch (action) {
+        case 'encode':
+            // This gives us back a JWT
+            // console.log('Plaintext: ' + input);
+
+            // Try to convert the input into a JSON object
+            input = jsonUtils.stringToJSON(input);
+
+            output = jwt.encode(input, secret);
+            // console.log('Encoded JWT: ' + output);
+            break;
+        case 'decode':
+            // This gives us back a JSON payload
+            // console.log('Encoded JWT: ' + input);
+
+            // If we have a validateSig flag, use it
+            output = jwt.decode(input, secret, ignoreSig);
+
+            // Try to convert the decoded JWT into a string
+            output = jsonUtils.jsonToString(output);
+
+            // console.log('Plaintext: ' + output);
+            break;
+        default:
+            output = '[ERROR] Invalid action.';
+            // console.log('[ERROR] Invalid action.');
+            break;
     }
 
-    if (payload.exp && Date.now() > payload.exp*1000) {
-      throw new Error('Token expired');
-    }
-  }
-
-  return payload;
-};
-
-
-/**
- * Encode jwt
- *
- * @param {Object} payload
- * @param {String} key
- * @param {String} algorithm
- * @param {Object} options
- * @return {String} token
- * @api public
- */
-jwt.encode = function jwt_encode(payload, key, algorithm, options) {
-  // Check key
-  if (!key) {
-    throw new Error('Require key');
-  }
-
-  // Check algorithm, default is HS256
-  if (!algorithm) {
-    algorithm = 'HS256';
-  }
-
-  var signingMethod = algorithmMap[algorithm];
-  var signingType = typeMap[algorithm];
-  if (!signingMethod || !signingType) {
-    throw new Error('Algorithm not supported');
-  }
-
-  // header, typ is fixed value.
-  var header = { typ: 'JWT', alg: algorithm };
-  if (options && options.header) {
-    assignProperties(header, options.header);
-  }
-
-  // create segments, all segments should be base64 string
-  var segments = [];
-  segments.push(base64urlEncode(JSON.stringify(header)));
-  segments.push(base64urlEncode(JSON.stringify(payload)));
-  segments.push(sign(segments.join('.'), key, signingMethod, signingType));
-
-  return segments.join('.');
+    return output;
 };
 
 /**
- * private util functions
- */
-
-function assignProperties(dest, source) {
-  for (var attr in source) {
-    if (source.hasOwnProperty(attr)) {
-      dest[attr] = source[attr];
+  * Certificate nCoder
+  * Encodes or decodes a certificate!
+  *
+  * @param {string} action The action to perform [encode/decode].
+  * @param {string} input The string to transform.
+  */
+module.exports.nCoderCertificate = async function nCoderCertificate(action, input) {
+    let output;
+    let response = null;
+    switch (action) {
+        case 'decode':
+            try {
+                response = await apiCertDecode(input);
+                const data = jsonUtils.jsonToString(response.data);
+                output = data;
+            } catch (e) {
+                console.error(e);
+                ouptut = 'Unable to decode certificate: Unknown error';
+            }
+            break;
+        default:
+            output = '[ERROR] Invalid action.';
+            console.log('[ERROR] Invalid action.');
+            break;
     }
-  }
+    return output;
+};
+
+/**
+  * API Certificate Decoder
+  * Calls the PEM decoder API
+  *
+  * @param {string} input The PEM string to decode
+  */
+async function apiCertDecode(input) {
+    const axios = require('axios');
+    let response = null;
+    let responseError = null;
+
+    response = await axios.post('https://api.ryanallen.ninja/utils/certificate/decode', input).catch(function (error) {
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            responseError = {'data': {'errorStatus': error.response.status, 'errorPayload': error.response.data}};
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+        console.log(error.config);
+    });
+ 
+    if(response){
+        return response;
+    } else {
+        return responseError;
+    }
 }
-
-function verify(input, key, method, type, signature) {
-  if(type === "hmac") {
-    return (signature === sign(input, key, method, type));
-  }
-  else if(type == "sign") {
-    return crypto.createVerify(method)
-                 .update(input)
-                 .verify(key, base64urlUnescape(signature), 'base64');
-  }
-  else {
-    throw new Error('Algorithm type not recognized');
-  }
-}
-
-function sign(input, key, method, type) {
-  var base64str;
-  if(type === "hmac") {
-    base64str = crypto.createHmac(method, key).update(input).digest('base64');
-  }
-  else if(type == "sign") {
-    base64str = crypto.createSign(method).update(input).sign(key, 'base64');
-  }
-  else {
-    throw new Error('Algorithm type not recognized');
-  }
-
-  return base64urlEscape(base64str);
-}
-
-function base64urlDecode(str) {
-  return new Buffer(base64urlUnescape(str), 'base64').toString();
-}
-
-function base64urlUnescape(str) {
-  str += new Array(5 - str.length % 4).join('=');
-  return str.replace(/\-/g, '+').replace(/_/g, '/');
-}
-
-function base64urlEncode(str) {
-  return base64urlEscape(new Buffer(str).toString('base64'));
-}
-
-function base64urlEscape(str) {
-  return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":52,"crypto":61}],5:[function(require,module,exports){
-/*! https://mths.be/utf8js v3.0.0 by @mathias */
-;(function(root) {
-
-	var stringFromCharCode = String.fromCharCode;
-
-	// Taken from https://mths.be/punycode
-	function ucs2decode(string) {
-		var output = [];
-		var counter = 0;
-		var length = string.length;
-		var value;
-		var extra;
-		while (counter < length) {
-			value = string.charCodeAt(counter++);
-			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
-				// high surrogate, and there is a next character
-				extra = string.charCodeAt(counter++);
-				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
-					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
-				} else {
-					// unmatched surrogate; only append this code unit, in case the next
-					// code unit is the high surrogate of a surrogate pair
-					output.push(value);
-					counter--;
-				}
-			} else {
-				output.push(value);
-			}
-		}
-		return output;
-	}
-
-	// Taken from https://mths.be/punycode
-	function ucs2encode(array) {
-		var length = array.length;
-		var index = -1;
-		var value;
-		var output = '';
-		while (++index < length) {
-			value = array[index];
-			if (value > 0xFFFF) {
-				value -= 0x10000;
-				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
-				value = 0xDC00 | value & 0x3FF;
-			}
-			output += stringFromCharCode(value);
-		}
-		return output;
-	}
-
-	function checkScalarValue(codePoint) {
-		if (codePoint >= 0xD800 && codePoint <= 0xDFFF) {
-			throw Error(
-				'Lone surrogate U+' + codePoint.toString(16).toUpperCase() +
-				' is not a scalar value'
-			);
-		}
-	}
-	/*--------------------------------------------------------------------------*/
-
-	function createByte(codePoint, shift) {
-		return stringFromCharCode(((codePoint >> shift) & 0x3F) | 0x80);
-	}
-
-	function encodeCodePoint(codePoint) {
-		if ((codePoint & 0xFFFFFF80) == 0) { // 1-byte sequence
-			return stringFromCharCode(codePoint);
-		}
-		var symbol = '';
-		if ((codePoint & 0xFFFFF800) == 0) { // 2-byte sequence
-			symbol = stringFromCharCode(((codePoint >> 6) & 0x1F) | 0xC0);
-		}
-		else if ((codePoint & 0xFFFF0000) == 0) { // 3-byte sequence
-			checkScalarValue(codePoint);
-			symbol = stringFromCharCode(((codePoint >> 12) & 0x0F) | 0xE0);
-			symbol += createByte(codePoint, 6);
-		}
-		else if ((codePoint & 0xFFE00000) == 0) { // 4-byte sequence
-			symbol = stringFromCharCode(((codePoint >> 18) & 0x07) | 0xF0);
-			symbol += createByte(codePoint, 12);
-			symbol += createByte(codePoint, 6);
-		}
-		symbol += stringFromCharCode((codePoint & 0x3F) | 0x80);
-		return symbol;
-	}
-
-	function utf8encode(string) {
-		var codePoints = ucs2decode(string);
-		var length = codePoints.length;
-		var index = -1;
-		var codePoint;
-		var byteString = '';
-		while (++index < length) {
-			codePoint = codePoints[index];
-			byteString += encodeCodePoint(codePoint);
-		}
-		return byteString;
-	}
-
-	/*--------------------------------------------------------------------------*/
-
-	function readContinuationByte() {
-		if (byteIndex >= byteCount) {
-			throw Error('Invalid byte index');
-		}
-
-		var continuationByte = byteArray[byteIndex] & 0xFF;
-		byteIndex++;
-
-		if ((continuationByte & 0xC0) == 0x80) {
-			return continuationByte & 0x3F;
-		}
-
-		// If we end up here, it’s not a continuation byte
-		throw Error('Invalid continuation byte');
-	}
-
-	function decodeSymbol() {
-		var byte1;
-		var byte2;
-		var byte3;
-		var byte4;
-		var codePoint;
-
-		if (byteIndex > byteCount) {
-			throw Error('Invalid byte index');
-		}
-
-		if (byteIndex == byteCount) {
-			return false;
-		}
-
-		// Read first byte
-		byte1 = byteArray[byteIndex] & 0xFF;
-		byteIndex++;
-
-		// 1-byte sequence (no continuation bytes)
-		if ((byte1 & 0x80) == 0) {
-			return byte1;
-		}
-
-		// 2-byte sequence
-		if ((byte1 & 0xE0) == 0xC0) {
-			byte2 = readContinuationByte();
-			codePoint = ((byte1 & 0x1F) << 6) | byte2;
-			if (codePoint >= 0x80) {
-				return codePoint;
-			} else {
-				throw Error('Invalid continuation byte');
-			}
-		}
-
-		// 3-byte sequence (may include unpaired surrogates)
-		if ((byte1 & 0xF0) == 0xE0) {
-			byte2 = readContinuationByte();
-			byte3 = readContinuationByte();
-			codePoint = ((byte1 & 0x0F) << 12) | (byte2 << 6) | byte3;
-			if (codePoint >= 0x0800) {
-				checkScalarValue(codePoint);
-				return codePoint;
-			} else {
-				throw Error('Invalid continuation byte');
-			}
-		}
-
-		// 4-byte sequence
-		if ((byte1 & 0xF8) == 0xF0) {
-			byte2 = readContinuationByte();
-			byte3 = readContinuationByte();
-			byte4 = readContinuationByte();
-			codePoint = ((byte1 & 0x07) << 0x12) | (byte2 << 0x0C) |
-				(byte3 << 0x06) | byte4;
-			if (codePoint >= 0x010000 && codePoint <= 0x10FFFF) {
-				return codePoint;
-			}
-		}
-
-		throw Error('Invalid UTF-8 detected');
-	}
-
-	var byteArray;
-	var byteCount;
-	var byteIndex;
-	function utf8decode(byteString) {
-		byteArray = ucs2decode(byteString);
-		byteCount = byteArray.length;
-		byteIndex = 0;
-		var codePoints = [];
-		var tmp;
-		while ((tmp = decodeSymbol()) !== false) {
-			codePoints.push(tmp);
-		}
-		return ucs2encode(codePoints);
-	}
-
-	/*--------------------------------------------------------------------------*/
-
-	root.version = '3.0.0';
-	root.encode = utf8encode;
-	root.decode = utf8decode;
-
-}(typeof exports === 'undefined' ? this.utf8 = {} : exports));
-
-},{}],6:[function(require,module,exports){
+},{"./jsonUtils.js":1,"axios":18,"base-64":43,"jwt-simple":134,"utf8":186}],4:[function(require,module,exports){
 var asn1 = exports;
 
 asn1.bignum = require('bn.js');
@@ -914,7 +378,7 @@ asn1.constants = require('./asn1/constants');
 asn1.decoders = require('./asn1/decoders');
 asn1.encoders = require('./asn1/encoders');
 
-},{"./asn1/api":7,"./asn1/base":9,"./asn1/constants":13,"./asn1/decoders":15,"./asn1/encoders":18,"bn.js":21}],7:[function(require,module,exports){
+},{"./asn1/api":5,"./asn1/base":7,"./asn1/constants":11,"./asn1/decoders":13,"./asn1/encoders":16,"bn.js":45}],5:[function(require,module,exports){
 var asn1 = require('../asn1');
 var inherits = require('inherits');
 
@@ -977,7 +441,7 @@ Entity.prototype.encode = function encode(data, enc, /* internal */ reporter) {
   return this._getEncoder(enc).encode(data, reporter);
 };
 
-},{"../asn1":6,"inherits":106,"vm":160}],8:[function(require,module,exports){
+},{"../asn1":4,"inherits":131,"vm":77}],6:[function(require,module,exports){
 var inherits = require('inherits');
 var Reporter = require('../base').Reporter;
 var Buffer = require('buffer').Buffer;
@@ -1095,7 +559,7 @@ EncoderBuffer.prototype.join = function join(out, offset) {
   return out;
 };
 
-},{"../base":9,"buffer":52,"inherits":106}],9:[function(require,module,exports){
+},{"../base":7,"buffer":79,"inherits":131}],7:[function(require,module,exports){
 var base = exports;
 
 base.Reporter = require('./reporter').Reporter;
@@ -1103,7 +567,7 @@ base.DecoderBuffer = require('./buffer').DecoderBuffer;
 base.EncoderBuffer = require('./buffer').EncoderBuffer;
 base.Node = require('./node');
 
-},{"./buffer":8,"./node":10,"./reporter":11}],10:[function(require,module,exports){
+},{"./buffer":6,"./node":8,"./reporter":9}],8:[function(require,module,exports){
 var Reporter = require('../base').Reporter;
 var EncoderBuffer = require('../base').EncoderBuffer;
 var DecoderBuffer = require('../base').DecoderBuffer;
@@ -1739,7 +1203,7 @@ Node.prototype._isPrintstr = function isPrintstr(str) {
   return /^[A-Za-z0-9 '\(\)\+,\-\.\/:=\?]*$/.test(str);
 };
 
-},{"../base":9,"minimalistic-assert":112}],11:[function(require,module,exports){
+},{"../base":7,"minimalistic-assert":139}],9:[function(require,module,exports){
 var inherits = require('inherits');
 
 function Reporter(options) {
@@ -1862,7 +1326,7 @@ ReporterError.prototype.rethrow = function rethrow(msg) {
   return this;
 };
 
-},{"inherits":106}],12:[function(require,module,exports){
+},{"inherits":131}],10:[function(require,module,exports){
 var constants = require('../constants');
 
 exports.tagClass = {
@@ -1906,7 +1370,7 @@ exports.tag = {
 };
 exports.tagByName = constants._reverse(exports.tag);
 
-},{"../constants":13}],13:[function(require,module,exports){
+},{"../constants":11}],11:[function(require,module,exports){
 var constants = exports;
 
 // Helper
@@ -1927,7 +1391,7 @@ constants._reverse = function reverse(map) {
 
 constants.der = require('./der');
 
-},{"./der":12}],14:[function(require,module,exports){
+},{"./der":10}],12:[function(require,module,exports){
 var inherits = require('inherits');
 
 var asn1 = require('../../asn1');
@@ -2253,13 +1717,13 @@ function derDecodeLen(buf, primitive, fail) {
   return len;
 }
 
-},{"../../asn1":6,"inherits":106}],15:[function(require,module,exports){
+},{"../../asn1":4,"inherits":131}],13:[function(require,module,exports){
 var decoders = exports;
 
 decoders.der = require('./der');
 decoders.pem = require('./pem');
 
-},{"./der":14,"./pem":16}],16:[function(require,module,exports){
+},{"./der":12,"./pem":14}],14:[function(require,module,exports){
 var inherits = require('inherits');
 var Buffer = require('buffer').Buffer;
 
@@ -2310,7 +1774,7 @@ PEMDecoder.prototype.decode = function decode(data, options) {
   return DERDecoder.prototype.decode.call(this, input, options);
 };
 
-},{"./der":14,"buffer":52,"inherits":106}],17:[function(require,module,exports){
+},{"./der":12,"buffer":79,"inherits":131}],15:[function(require,module,exports){
 var inherits = require('inherits');
 var Buffer = require('buffer').Buffer;
 
@@ -2607,13 +2071,13 @@ function encodeTag(tag, primitive, cls, reporter) {
   return res;
 }
 
-},{"../../asn1":6,"buffer":52,"inherits":106}],18:[function(require,module,exports){
+},{"../../asn1":4,"buffer":79,"inherits":131}],16:[function(require,module,exports){
 var encoders = exports;
 
 encoders.der = require('./der');
 encoders.pem = require('./pem');
 
-},{"./der":17,"./pem":19}],19:[function(require,module,exports){
+},{"./der":15,"./pem":17}],17:[function(require,module,exports){
 var inherits = require('inherits');
 
 var DEREncoder = require('./der');
@@ -2636,7 +2100,1598 @@ PEMEncoder.prototype.encode = function encode(data, options) {
   return out.join('\n');
 };
 
-},{"./der":17,"inherits":106}],20:[function(require,module,exports){
+},{"./der":15,"inherits":131}],18:[function(require,module,exports){
+module.exports = require('./lib/axios');
+},{"./lib/axios":20}],19:[function(require,module,exports){
+(function (process){
+'use strict';
+
+var utils = require('./../utils');
+var settle = require('./../core/settle');
+var buildURL = require('./../helpers/buildURL');
+var parseHeaders = require('./../helpers/parseHeaders');
+var isURLSameOrigin = require('./../helpers/isURLSameOrigin');
+var createError = require('../core/createError');
+var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || require('./../helpers/btoa');
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+    var loadEvent = 'onreadystatechange';
+    var xDomain = false;
+
+    // For IE 8/9 CORS support
+    // Only supports POST and GET calls and doesn't returns the response headers.
+    // DON'T do this for testing b/c XMLHttpRequest is mocked, not XDomainRequest.
+    if (process.env.NODE_ENV !== 'test' &&
+        typeof window !== 'undefined' &&
+        window.XDomainRequest && !('withCredentials' in request) &&
+        !isURLSameOrigin(config.url)) {
+      request = new window.XDomainRequest();
+      loadEvent = 'onload';
+      xDomain = true;
+      request.onprogress = function handleProgress() {};
+      request.ontimeout = function handleTimeout() {};
+    }
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password || '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    request.open(config.method.toUpperCase(), buildURL(config.url, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request[loadEvent] = function handleLoad() {
+      if (!request || (request.readyState !== 4 && !xDomain)) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        // IE sends 1223 instead of 204 (https://github.com/axios/axios/issues/201)
+        status: request.status === 1223 ? 204 : request.status,
+        statusText: request.status === 1223 ? 'No Content' : request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      var cookies = require('./../helpers/cookies');
+
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
+          cookies.read(config.xsrfCookieName) :
+          undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (config.withCredentials) {
+      request.withCredentials = true;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (requestData === undefined) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+}).call(this,require('_process'))
+},{"../core/createError":26,"./../core/settle":29,"./../helpers/btoa":33,"./../helpers/buildURL":34,"./../helpers/cookies":36,"./../helpers/isURLSameOrigin":38,"./../helpers/parseHeaders":40,"./../utils":42,"_process":152}],20:[function(require,module,exports){
+'use strict';
+
+var utils = require('./utils');
+var bind = require('./helpers/bind');
+var Axios = require('./core/Axios');
+var defaults = require('./defaults');
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(utils.merge(defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = require('./cancel/Cancel');
+axios.CancelToken = require('./cancel/CancelToken');
+axios.isCancel = require('./cancel/isCancel');
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = require('./helpers/spread');
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+},{"./cancel/Cancel":21,"./cancel/CancelToken":22,"./cancel/isCancel":23,"./core/Axios":24,"./defaults":31,"./helpers/bind":32,"./helpers/spread":41,"./utils":42}],21:[function(require,module,exports){
+'use strict';
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+},{}],22:[function(require,module,exports){
+'use strict';
+
+var Cancel = require('./Cancel');
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+},{"./Cancel":21}],23:[function(require,module,exports){
+'use strict';
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+},{}],24:[function(require,module,exports){
+'use strict';
+
+var defaults = require('./../defaults');
+var utils = require('./../utils');
+var InterceptorManager = require('./InterceptorManager');
+var dispatchRequest = require('./dispatchRequest');
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = utils.merge({
+      url: arguments[0]
+    }, arguments[1]);
+  }
+
+  config = utils.merge(defaults, {method: 'get'}, this.defaults, config);
+  config.method = config.method.toLowerCase();
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+},{"./../defaults":31,"./../utils":42,"./InterceptorManager":25,"./dispatchRequest":27}],25:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+},{"./../utils":42}],26:[function(require,module,exports){
+'use strict';
+
+var enhanceError = require('./enhanceError');
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+},{"./enhanceError":28}],27:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+var transformData = require('./transformData');
+var isCancel = require('../cancel/isCancel');
+var defaults = require('../defaults');
+var isAbsoluteURL = require('./../helpers/isAbsoluteURL');
+var combineURLs = require('./../helpers/combineURLs');
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Support baseURL config
+  if (config.baseURL && !isAbsoluteURL(config.url)) {
+    config.url = combineURLs(config.baseURL, config.url);
+  }
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers || {}
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+},{"../cancel/isCancel":23,"../defaults":31,"./../helpers/combineURLs":35,"./../helpers/isAbsoluteURL":37,"./../utils":42,"./transformData":30}],28:[function(require,module,exports){
+'use strict';
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+  error.request = request;
+  error.response = response;
+  return error;
+};
+
+},{}],29:[function(require,module,exports){
+'use strict';
+
+var createError = require('./createError');
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  // Note: status is not exposed by XDomainRequest
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+},{"./createError":26}],30:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+},{"./../utils":42}],31:[function(require,module,exports){
+(function (process){
+'use strict';
+
+var utils = require('./utils');
+var normalizeHeaderName = require('./helpers/normalizeHeaderName');
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = require('./adapters/xhr');
+  } else if (typeof process !== 'undefined') {
+    // For node use HTTP adapter
+    adapter = require('./adapters/http');
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+}).call(this,require('_process'))
+},{"./adapters/http":19,"./adapters/xhr":19,"./helpers/normalizeHeaderName":39,"./utils":42,"_process":152}],32:[function(require,module,exports){
+'use strict';
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+},{}],33:[function(require,module,exports){
+'use strict';
+
+// btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
+
+var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+function E() {
+  this.message = 'String contains an invalid character';
+}
+E.prototype = new Error;
+E.prototype.code = 5;
+E.prototype.name = 'InvalidCharacterError';
+
+function btoa(input) {
+  var str = String(input);
+  var output = '';
+  for (
+    // initialize result and counter
+    var block, charCode, idx = 0, map = chars;
+    // if the next str index does not exist:
+    //   change the mapping table to "="
+    //   check if d has no fractional digits
+    str.charAt(idx | 0) || (map = '=', idx % 1);
+    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+    output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+  ) {
+    charCode = str.charCodeAt(idx += 3 / 4);
+    if (charCode > 0xFF) {
+      throw new E();
+    }
+    block = block << 8 | charCode;
+  }
+  return output;
+}
+
+module.exports = btoa;
+
+},{}],34:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+},{"./../utils":42}],35:[function(require,module,exports){
+'use strict';
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+},{}],36:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+  (function standardBrowserEnv() {
+    return {
+      write: function write(name, value, expires, path, domain, secure) {
+        var cookie = [];
+        cookie.push(name + '=' + encodeURIComponent(value));
+
+        if (utils.isNumber(expires)) {
+          cookie.push('expires=' + new Date(expires).toGMTString());
+        }
+
+        if (utils.isString(path)) {
+          cookie.push('path=' + path);
+        }
+
+        if (utils.isString(domain)) {
+          cookie.push('domain=' + domain);
+        }
+
+        if (secure === true) {
+          cookie.push('secure');
+        }
+
+        document.cookie = cookie.join('; ');
+      },
+
+      read: function read(name) {
+        var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+        return (match ? decodeURIComponent(match[3]) : null);
+      },
+
+      remove: function remove(name) {
+        this.write(name, '', Date.now() - 86400000);
+      }
+    };
+  })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+  (function nonStandardBrowserEnv() {
+    return {
+      write: function write() {},
+      read: function read() { return null; },
+      remove: function remove() {}
+    };
+  })()
+);
+
+},{"./../utils":42}],37:[function(require,module,exports){
+'use strict';
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+},{}],38:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+  (function standardBrowserEnv() {
+    var msie = /(msie|trident)/i.test(navigator.userAgent);
+    var urlParsingNode = document.createElement('a');
+    var originURL;
+
+    /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+    function resolveURL(url) {
+      var href = url;
+
+      if (msie) {
+        // IE needs attribute set twice to normalize properties
+        urlParsingNode.setAttribute('href', href);
+        href = urlParsingNode.href;
+      }
+
+      urlParsingNode.setAttribute('href', href);
+
+      // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+      return {
+        href: urlParsingNode.href,
+        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+        host: urlParsingNode.host,
+        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+        hostname: urlParsingNode.hostname,
+        port: urlParsingNode.port,
+        pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+                  urlParsingNode.pathname :
+                  '/' + urlParsingNode.pathname
+      };
+    }
+
+    originURL = resolveURL(window.location.href);
+
+    /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+    return function isURLSameOrigin(requestURL) {
+      var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+      return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+    };
+  })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+  (function nonStandardBrowserEnv() {
+    return function isURLSameOrigin() {
+      return true;
+    };
+  })()
+);
+
+},{"./../utils":42}],39:[function(require,module,exports){
+'use strict';
+
+var utils = require('../utils');
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+},{"../utils":42}],40:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+},{"./../utils":42}],41:[function(require,module,exports){
+'use strict';
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+},{}],42:[function(require,module,exports){
+'use strict';
+
+var bind = require('./helpers/bind');
+var isBuffer = require('is-buffer');
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim
+};
+
+},{"./helpers/bind":32,"is-buffer":132}],43:[function(require,module,exports){
+(function (global){
+/*! http://mths.be/base64 v0.1.0 by @mathias | MIT license */
+;(function(root) {
+
+	// Detect free variables `exports`.
+	var freeExports = typeof exports == 'object' && exports;
+
+	// Detect free variable `module`.
+	var freeModule = typeof module == 'object' && module &&
+		module.exports == freeExports && module;
+
+	// Detect free variable `global`, from Node.js or Browserified code, and use
+	// it as `root`.
+	var freeGlobal = typeof global == 'object' && global;
+	if (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal) {
+		root = freeGlobal;
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	var InvalidCharacterError = function(message) {
+		this.message = message;
+	};
+	InvalidCharacterError.prototype = new Error;
+	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
+
+	var error = function(message) {
+		// Note: the error messages used throughout this file match those used by
+		// the native `atob`/`btoa` implementation in Chromium.
+		throw new InvalidCharacterError(message);
+	};
+
+	var TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	// http://whatwg.org/html/common-microsyntaxes.html#space-character
+	var REGEX_SPACE_CHARACTERS = /[\t\n\f\r ]/g;
+
+	// `decode` is designed to be fully compatible with `atob` as described in the
+	// HTML Standard. http://whatwg.org/html/webappapis.html#dom-windowbase64-atob
+	// The optimized base64-decoding algorithm used is based on @atk’s excellent
+	// implementation. https://gist.github.com/atk/1020396
+	var decode = function(input) {
+		input = String(input)
+			.replace(REGEX_SPACE_CHARACTERS, '');
+		var length = input.length;
+		if (length % 4 == 0) {
+			input = input.replace(/==?$/, '');
+			length = input.length;
+		}
+		if (
+			length % 4 == 1 ||
+			// http://whatwg.org/C#alphanumeric-ascii-characters
+			/[^+a-zA-Z0-9/]/.test(input)
+		) {
+			error(
+				'Invalid character: the string to be decoded is not correctly encoded.'
+			);
+		}
+		var bitCounter = 0;
+		var bitStorage;
+		var buffer;
+		var output = '';
+		var position = -1;
+		while (++position < length) {
+			buffer = TABLE.indexOf(input.charAt(position));
+			bitStorage = bitCounter % 4 ? bitStorage * 64 + buffer : buffer;
+			// Unless this is the first of a group of 4 characters…
+			if (bitCounter++ % 4) {
+				// …convert the first 8 bits to a single ASCII character.
+				output += String.fromCharCode(
+					0xFF & bitStorage >> (-2 * bitCounter & 6)
+				);
+			}
+		}
+		return output;
+	};
+
+	// `encode` is designed to be fully compatible with `btoa` as described in the
+	// HTML Standard: http://whatwg.org/html/webappapis.html#dom-windowbase64-btoa
+	var encode = function(input) {
+		input = String(input);
+		if (/[^\0-\xFF]/.test(input)) {
+			// Note: no need to special-case astral symbols here, as surrogates are
+			// matched, and the input is supposed to only contain ASCII anyway.
+			error(
+				'The string to be encoded contains characters outside of the ' +
+				'Latin1 range.'
+			);
+		}
+		var padding = input.length % 3;
+		var output = '';
+		var position = -1;
+		var a;
+		var b;
+		var c;
+		var d;
+		var buffer;
+		// Make sure any padding is handled outside of the loop.
+		var length = input.length - padding;
+
+		while (++position < length) {
+			// Read three bytes, i.e. 24 bits.
+			a = input.charCodeAt(position) << 16;
+			b = input.charCodeAt(++position) << 8;
+			c = input.charCodeAt(++position);
+			buffer = a + b + c;
+			// Turn the 24 bits into four chunks of 6 bits each, and append the
+			// matching character for each of them to the output.
+			output += (
+				TABLE.charAt(buffer >> 18 & 0x3F) +
+				TABLE.charAt(buffer >> 12 & 0x3F) +
+				TABLE.charAt(buffer >> 6 & 0x3F) +
+				TABLE.charAt(buffer & 0x3F)
+			);
+		}
+
+		if (padding == 2) {
+			a = input.charCodeAt(position) << 8;
+			b = input.charCodeAt(++position);
+			buffer = a + b;
+			output += (
+				TABLE.charAt(buffer >> 10) +
+				TABLE.charAt((buffer >> 4) & 0x3F) +
+				TABLE.charAt((buffer << 2) & 0x3F) +
+				'='
+			);
+		} else if (padding == 1) {
+			buffer = input.charCodeAt(position);
+			output += (
+				TABLE.charAt(buffer >> 2) +
+				TABLE.charAt((buffer << 4) & 0x3F) +
+				'=='
+			);
+		}
+
+		return output;
+	};
+
+	var base64 = {
+		'encode': encode,
+		'decode': decode,
+		'version': '0.1.0'
+	};
+
+	// Some AMD build optimizers, like r.js, check for specific condition patterns
+	// like the following:
+	if (
+		typeof define == 'function' &&
+		typeof define.amd == 'object' &&
+		define.amd
+	) {
+		define(function() {
+			return base64;
+		});
+	}	else if (freeExports && !freeExports.nodeType) {
+		if (freeModule) { // in Node.js or RingoJS v0.8.0+
+			freeModule.exports = base64;
+		} else { // in Narwhal or RingoJS v0.7.0-
+			for (var key in base64) {
+				base64.hasOwnProperty(key) && (freeExports[key] = base64[key]);
+			}
+		}
+	} else { // in Rhino or a web browser
+		root.base64 = base64;
+	}
+
+}(this));
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],44:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -2752,7 +3807,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],21:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 (function (module, exports) {
   'use strict';
 
@@ -6181,7 +7236,7 @@ function fromByteArray (uint8) {
   };
 })(typeof module === 'undefined' || module, this);
 
-},{"buffer":23}],22:[function(require,module,exports){
+},{"buffer":47}],46:[function(require,module,exports){
 var r;
 
 module.exports = function rand(len) {
@@ -6248,9 +7303,9 @@ if (typeof self === 'object') {
   }
 }
 
-},{"crypto":23}],23:[function(require,module,exports){
+},{"crypto":47}],47:[function(require,module,exports){
 
-},{}],24:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 // based on the aes implimentation in triple sec
 // https://github.com/keybase/triplesec
 // which is in turn based on the one from crypto-js
@@ -6480,7 +7535,7 @@ AES.prototype.scrub = function () {
 
 module.exports.AES = AES
 
-},{"safe-buffer":148}],25:[function(require,module,exports){
+},{"safe-buffer":175}],49:[function(require,module,exports){
 var aes = require('./aes')
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('cipher-base')
@@ -6599,7 +7654,7 @@ StreamCipher.prototype.setAAD = function setAAD (buf) {
 
 module.exports = StreamCipher
 
-},{"./aes":24,"./ghash":29,"./incr32":30,"buffer-xor":51,"cipher-base":53,"inherits":106,"safe-buffer":148}],26:[function(require,module,exports){
+},{"./aes":48,"./ghash":53,"./incr32":54,"buffer-xor":78,"cipher-base":80,"inherits":131,"safe-buffer":175}],50:[function(require,module,exports){
 var ciphers = require('./encrypter')
 var deciphers = require('./decrypter')
 var modes = require('./modes/list.json')
@@ -6614,7 +7669,7 @@ exports.createDecipher = exports.Decipher = deciphers.createDecipher
 exports.createDecipheriv = exports.Decipheriv = deciphers.createDecipheriv
 exports.listCiphers = exports.getCiphers = getCiphers
 
-},{"./decrypter":27,"./encrypter":28,"./modes/list.json":38}],27:[function(require,module,exports){
+},{"./decrypter":51,"./encrypter":52,"./modes/list.json":62}],51:[function(require,module,exports){
 var AuthCipher = require('./authCipher')
 var Buffer = require('safe-buffer').Buffer
 var MODES = require('./modes')
@@ -6737,7 +7792,7 @@ function createDecipher (suite, password) {
 exports.createDecipher = createDecipher
 exports.createDecipheriv = createDecipheriv
 
-},{"./aes":24,"./authCipher":25,"./modes":37,"./streamCipher":40,"cipher-base":53,"evp_bytestokey":89,"inherits":106,"safe-buffer":148}],28:[function(require,module,exports){
+},{"./aes":48,"./authCipher":49,"./modes":61,"./streamCipher":64,"cipher-base":80,"evp_bytestokey":115,"inherits":131,"safe-buffer":175}],52:[function(require,module,exports){
 var MODES = require('./modes')
 var AuthCipher = require('./authCipher')
 var Buffer = require('safe-buffer').Buffer
@@ -6853,7 +7908,7 @@ function createCipher (suite, password) {
 exports.createCipheriv = createCipheriv
 exports.createCipher = createCipher
 
-},{"./aes":24,"./authCipher":25,"./modes":37,"./streamCipher":40,"cipher-base":53,"evp_bytestokey":89,"inherits":106,"safe-buffer":148}],29:[function(require,module,exports){
+},{"./aes":48,"./authCipher":49,"./modes":61,"./streamCipher":64,"cipher-base":80,"evp_bytestokey":115,"inherits":131,"safe-buffer":175}],53:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var ZEROES = Buffer.alloc(16, 0)
 
@@ -6944,7 +7999,7 @@ GHASH.prototype.final = function (abl, bl) {
 
 module.exports = GHASH
 
-},{"safe-buffer":148}],30:[function(require,module,exports){
+},{"safe-buffer":175}],54:[function(require,module,exports){
 function incr32 (iv) {
   var len = iv.length
   var item
@@ -6961,7 +8016,7 @@ function incr32 (iv) {
 }
 module.exports = incr32
 
-},{}],31:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 var xor = require('buffer-xor')
 
 exports.encrypt = function (self, block) {
@@ -6980,7 +8035,7 @@ exports.decrypt = function (self, block) {
   return xor(out, pad)
 }
 
-},{"buffer-xor":51}],32:[function(require,module,exports){
+},{"buffer-xor":78}],56:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var xor = require('buffer-xor')
 
@@ -7015,7 +8070,7 @@ exports.encrypt = function (self, data, decrypt) {
   return out
 }
 
-},{"buffer-xor":51,"safe-buffer":148}],33:[function(require,module,exports){
+},{"buffer-xor":78,"safe-buffer":175}],57:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 
 function encryptByte (self, byteParam, decrypt) {
@@ -7059,7 +8114,7 @@ exports.encrypt = function (self, chunk, decrypt) {
   return out
 }
 
-},{"safe-buffer":148}],34:[function(require,module,exports){
+},{"safe-buffer":175}],58:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 
 function encryptByte (self, byteParam, decrypt) {
@@ -7086,7 +8141,7 @@ exports.encrypt = function (self, chunk, decrypt) {
   return out
 }
 
-},{"safe-buffer":148}],35:[function(require,module,exports){
+},{"safe-buffer":175}],59:[function(require,module,exports){
 var xor = require('buffer-xor')
 var Buffer = require('safe-buffer').Buffer
 var incr32 = require('../incr32')
@@ -7118,7 +8173,7 @@ exports.encrypt = function (self, chunk) {
   return xor(chunk, pad)
 }
 
-},{"../incr32":30,"buffer-xor":51,"safe-buffer":148}],36:[function(require,module,exports){
+},{"../incr32":54,"buffer-xor":78,"safe-buffer":175}],60:[function(require,module,exports){
 exports.encrypt = function (self, block) {
   return self._cipher.encryptBlock(block)
 }
@@ -7127,7 +8182,7 @@ exports.decrypt = function (self, block) {
   return self._cipher.decryptBlock(block)
 }
 
-},{}],37:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 var modeModules = {
   ECB: require('./ecb'),
   CBC: require('./cbc'),
@@ -7147,7 +8202,7 @@ for (var key in modes) {
 
 module.exports = modes
 
-},{"./cbc":31,"./cfb":32,"./cfb1":33,"./cfb8":34,"./ctr":35,"./ecb":36,"./list.json":38,"./ofb":39}],38:[function(require,module,exports){
+},{"./cbc":55,"./cfb":56,"./cfb1":57,"./cfb8":58,"./ctr":59,"./ecb":60,"./list.json":62,"./ofb":63}],62:[function(require,module,exports){
 module.exports={
   "aes-128-ecb": {
     "cipher": "AES",
@@ -7340,7 +8395,7 @@ module.exports={
   }
 }
 
-},{}],39:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 (function (Buffer){
 var xor = require('buffer-xor')
 
@@ -7360,7 +8415,7 @@ exports.encrypt = function (self, chunk) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":52,"buffer-xor":51}],40:[function(require,module,exports){
+},{"buffer":79,"buffer-xor":78}],64:[function(require,module,exports){
 var aes = require('./aes')
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('cipher-base')
@@ -7389,7 +8444,7 @@ StreamCipher.prototype._final = function () {
 
 module.exports = StreamCipher
 
-},{"./aes":24,"cipher-base":53,"inherits":106,"safe-buffer":148}],41:[function(require,module,exports){
+},{"./aes":48,"cipher-base":80,"inherits":131,"safe-buffer":175}],65:[function(require,module,exports){
 var ebtk = require('evp_bytestokey')
 var aes = require('browserify-aes/browser')
 var DES = require('browserify-des')
@@ -7464,7 +8519,7 @@ function getCiphers () {
 }
 exports.listCiphers = exports.getCiphers = getCiphers
 
-},{"browserify-aes/browser":26,"browserify-aes/modes":37,"browserify-des":42,"browserify-des/modes":43,"evp_bytestokey":89}],42:[function(require,module,exports){
+},{"browserify-aes/browser":50,"browserify-aes/modes":61,"browserify-des":66,"browserify-des/modes":67,"evp_bytestokey":115}],66:[function(require,module,exports){
 (function (Buffer){
 var CipherBase = require('cipher-base')
 var des = require('des.js')
@@ -7511,7 +8566,7 @@ DES.prototype._final = function () {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":52,"cipher-base":53,"des.js":62,"inherits":106}],43:[function(require,module,exports){
+},{"buffer":79,"cipher-base":80,"des.js":89,"inherits":131}],67:[function(require,module,exports){
 exports['des-ecb'] = {
   key: 8,
   iv: 0
@@ -7537,7 +8592,7 @@ exports['des-ede'] = {
   iv: 0
 }
 
-},{}],44:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 (function (Buffer){
 var bn = require('bn.js');
 var randomBytes = require('randombytes');
@@ -7581,10 +8636,10 @@ function getr(priv) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"bn.js":21,"buffer":52,"randombytes":132}],45:[function(require,module,exports){
+},{"bn.js":45,"buffer":79,"randombytes":159}],69:[function(require,module,exports){
 module.exports = require('./browser/algorithms.json')
 
-},{"./browser/algorithms.json":46}],46:[function(require,module,exports){
+},{"./browser/algorithms.json":70}],70:[function(require,module,exports){
 module.exports={
   "sha224WithRSAEncryption": {
     "sign": "rsa",
@@ -7738,7 +8793,7 @@ module.exports={
   }
 }
 
-},{}],47:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 module.exports={
   "1.3.132.0.10": "secp256k1",
   "1.3.132.0.33": "p224",
@@ -7748,7 +8803,7 @@ module.exports={
   "1.3.132.0.35": "p521"
 }
 
-},{}],48:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('create-hash')
 var stream = require('stream')
@@ -7843,7 +8898,7 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./algorithms.json":46,"./sign":49,"./verify":50,"buffer":52,"create-hash":56,"inherits":106,"stream":157}],49:[function(require,module,exports){
+},{"./algorithms.json":70,"./sign":73,"./verify":74,"buffer":79,"create-hash":83,"inherits":131,"stream":184}],73:[function(require,module,exports){
 (function (Buffer){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
 var createHmac = require('create-hmac')
@@ -7992,7 +9047,7 @@ module.exports.getKey = getKey
 module.exports.makeKey = makeKey
 
 }).call(this,require("buffer").Buffer)
-},{"./curves.json":47,"bn.js":21,"browserify-rsa":44,"buffer":52,"create-hmac":59,"elliptic":72,"parse-asn1":118}],50:[function(require,module,exports){
+},{"./curves.json":71,"bn.js":45,"browserify-rsa":68,"buffer":79,"create-hmac":86,"elliptic":99,"parse-asn1":145}],74:[function(require,module,exports){
 (function (Buffer){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
 var BN = require('bn.js')
@@ -8079,7 +9134,972 @@ function checkValue (b, q) {
 module.exports = verify
 
 }).call(this,require("buffer").Buffer)
-},{"./curves.json":47,"bn.js":21,"buffer":52,"elliptic":72,"parse-asn1":118}],51:[function(require,module,exports){
+},{"./curves.json":71,"bn.js":45,"buffer":79,"elliptic":99,"parse-asn1":145}],75:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var objectCreate = Object.create || objectCreatePolyfill
+var objectKeys = Object.keys || objectKeysPolyfill
+var bind = Function.prototype.bind || functionBindPolyfill
+
+function EventEmitter() {
+  if (!this._events || !Object.prototype.hasOwnProperty.call(this, '_events')) {
+    this._events = objectCreate(null);
+    this._eventsCount = 0;
+  }
+
+  this._maxListeners = this._maxListeners || undefined;
+}
+module.exports = EventEmitter;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+var defaultMaxListeners = 10;
+
+var hasDefineProperty;
+try {
+  var o = {};
+  if (Object.defineProperty) Object.defineProperty(o, 'x', { value: 0 });
+  hasDefineProperty = o.x === 0;
+} catch (err) { hasDefineProperty = false }
+if (hasDefineProperty) {
+  Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
+    enumerable: true,
+    get: function() {
+      return defaultMaxListeners;
+    },
+    set: function(arg) {
+      // check whether the input is a positive number (whose value is zero or
+      // greater and not a NaN).
+      if (typeof arg !== 'number' || arg < 0 || arg !== arg)
+        throw new TypeError('"defaultMaxListeners" must be a positive number');
+      defaultMaxListeners = arg;
+    }
+  });
+} else {
+  EventEmitter.defaultMaxListeners = defaultMaxListeners;
+}
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
+  if (typeof n !== 'number' || n < 0 || isNaN(n))
+    throw new TypeError('"n" argument must be a positive number');
+  this._maxListeners = n;
+  return this;
+};
+
+function $getMaxListeners(that) {
+  if (that._maxListeners === undefined)
+    return EventEmitter.defaultMaxListeners;
+  return that._maxListeners;
+}
+
+EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
+  return $getMaxListeners(this);
+};
+
+// These standalone emit* functions are used to optimize calling of event
+// handlers for fast cases because emit() itself often has a variable number of
+// arguments and can be deoptimized because of that. These functions always have
+// the same number of arguments and thus do not get deoptimized, so the code
+// inside them can execute faster.
+function emitNone(handler, isFn, self) {
+  if (isFn)
+    handler.call(self);
+  else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      listeners[i].call(self);
+  }
+}
+function emitOne(handler, isFn, self, arg1) {
+  if (isFn)
+    handler.call(self, arg1);
+  else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      listeners[i].call(self, arg1);
+  }
+}
+function emitTwo(handler, isFn, self, arg1, arg2) {
+  if (isFn)
+    handler.call(self, arg1, arg2);
+  else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      listeners[i].call(self, arg1, arg2);
+  }
+}
+function emitThree(handler, isFn, self, arg1, arg2, arg3) {
+  if (isFn)
+    handler.call(self, arg1, arg2, arg3);
+  else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      listeners[i].call(self, arg1, arg2, arg3);
+  }
+}
+
+function emitMany(handler, isFn, self, args) {
+  if (isFn)
+    handler.apply(self, args);
+  else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      listeners[i].apply(self, args);
+  }
+}
+
+EventEmitter.prototype.emit = function emit(type) {
+  var er, handler, len, args, i, events;
+  var doError = (type === 'error');
+
+  events = this._events;
+  if (events)
+    doError = (doError && events.error == null);
+  else if (!doError)
+    return false;
+
+  // If there is no 'error' event listener then throw.
+  if (doError) {
+    if (arguments.length > 1)
+      er = arguments[1];
+    if (er instanceof Error) {
+      throw er; // Unhandled 'error' event
+    } else {
+      // At least give some kind of context to the user
+      var err = new Error('Unhandled "error" event. (' + er + ')');
+      err.context = er;
+      throw err;
+    }
+    return false;
+  }
+
+  handler = events[type];
+
+  if (!handler)
+    return false;
+
+  var isFn = typeof handler === 'function';
+  len = arguments.length;
+  switch (len) {
+      // fast cases
+    case 1:
+      emitNone(handler, isFn, this);
+      break;
+    case 2:
+      emitOne(handler, isFn, this, arguments[1]);
+      break;
+    case 3:
+      emitTwo(handler, isFn, this, arguments[1], arguments[2]);
+      break;
+    case 4:
+      emitThree(handler, isFn, this, arguments[1], arguments[2], arguments[3]);
+      break;
+      // slower
+    default:
+      args = new Array(len - 1);
+      for (i = 1; i < len; i++)
+        args[i - 1] = arguments[i];
+      emitMany(handler, isFn, this, args);
+  }
+
+  return true;
+};
+
+function _addListener(target, type, listener, prepend) {
+  var m;
+  var events;
+  var existing;
+
+  if (typeof listener !== 'function')
+    throw new TypeError('"listener" argument must be a function');
+
+  events = target._events;
+  if (!events) {
+    events = target._events = objectCreate(null);
+    target._eventsCount = 0;
+  } else {
+    // To avoid recursion in the case that type === "newListener"! Before
+    // adding it to the listeners, first emit "newListener".
+    if (events.newListener) {
+      target.emit('newListener', type,
+          listener.listener ? listener.listener : listener);
+
+      // Re-assign `events` because a newListener handler could have caused the
+      // this._events to be assigned to a new object
+      events = target._events;
+    }
+    existing = events[type];
+  }
+
+  if (!existing) {
+    // Optimize the case of one listener. Don't need the extra array object.
+    existing = events[type] = listener;
+    ++target._eventsCount;
+  } else {
+    if (typeof existing === 'function') {
+      // Adding the second element, need to change to array.
+      existing = events[type] =
+          prepend ? [listener, existing] : [existing, listener];
+    } else {
+      // If we've already got an array, just append.
+      if (prepend) {
+        existing.unshift(listener);
+      } else {
+        existing.push(listener);
+      }
+    }
+
+    // Check for listener leak
+    if (!existing.warned) {
+      m = $getMaxListeners(target);
+      if (m && m > 0 && existing.length > m) {
+        existing.warned = true;
+        var w = new Error('Possible EventEmitter memory leak detected. ' +
+            existing.length + ' "' + String(type) + '" listeners ' +
+            'added. Use emitter.setMaxListeners() to ' +
+            'increase limit.');
+        w.name = 'MaxListenersExceededWarning';
+        w.emitter = target;
+        w.type = type;
+        w.count = existing.length;
+        if (typeof console === 'object' && console.warn) {
+          console.warn('%s: %s', w.name, w.message);
+        }
+      }
+    }
+  }
+
+  return target;
+}
+
+EventEmitter.prototype.addListener = function addListener(type, listener) {
+  return _addListener(this, type, listener, false);
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.prependListener =
+    function prependListener(type, listener) {
+      return _addListener(this, type, listener, true);
+    };
+
+function onceWrapper() {
+  if (!this.fired) {
+    this.target.removeListener(this.type, this.wrapFn);
+    this.fired = true;
+    switch (arguments.length) {
+      case 0:
+        return this.listener.call(this.target);
+      case 1:
+        return this.listener.call(this.target, arguments[0]);
+      case 2:
+        return this.listener.call(this.target, arguments[0], arguments[1]);
+      case 3:
+        return this.listener.call(this.target, arguments[0], arguments[1],
+            arguments[2]);
+      default:
+        var args = new Array(arguments.length);
+        for (var i = 0; i < args.length; ++i)
+          args[i] = arguments[i];
+        this.listener.apply(this.target, args);
+    }
+  }
+}
+
+function _onceWrap(target, type, listener) {
+  var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };
+  var wrapped = bind.call(onceWrapper, state);
+  wrapped.listener = listener;
+  state.wrapFn = wrapped;
+  return wrapped;
+}
+
+EventEmitter.prototype.once = function once(type, listener) {
+  if (typeof listener !== 'function')
+    throw new TypeError('"listener" argument must be a function');
+  this.on(type, _onceWrap(this, type, listener));
+  return this;
+};
+
+EventEmitter.prototype.prependOnceListener =
+    function prependOnceListener(type, listener) {
+      if (typeof listener !== 'function')
+        throw new TypeError('"listener" argument must be a function');
+      this.prependListener(type, _onceWrap(this, type, listener));
+      return this;
+    };
+
+// Emits a 'removeListener' event if and only if the listener was removed.
+EventEmitter.prototype.removeListener =
+    function removeListener(type, listener) {
+      var list, events, position, i, originalListener;
+
+      if (typeof listener !== 'function')
+        throw new TypeError('"listener" argument must be a function');
+
+      events = this._events;
+      if (!events)
+        return this;
+
+      list = events[type];
+      if (!list)
+        return this;
+
+      if (list === listener || list.listener === listener) {
+        if (--this._eventsCount === 0)
+          this._events = objectCreate(null);
+        else {
+          delete events[type];
+          if (events.removeListener)
+            this.emit('removeListener', type, list.listener || listener);
+        }
+      } else if (typeof list !== 'function') {
+        position = -1;
+
+        for (i = list.length - 1; i >= 0; i--) {
+          if (list[i] === listener || list[i].listener === listener) {
+            originalListener = list[i].listener;
+            position = i;
+            break;
+          }
+        }
+
+        if (position < 0)
+          return this;
+
+        if (position === 0)
+          list.shift();
+        else
+          spliceOne(list, position);
+
+        if (list.length === 1)
+          events[type] = list[0];
+
+        if (events.removeListener)
+          this.emit('removeListener', type, originalListener || listener);
+      }
+
+      return this;
+    };
+
+EventEmitter.prototype.removeAllListeners =
+    function removeAllListeners(type) {
+      var listeners, events, i;
+
+      events = this._events;
+      if (!events)
+        return this;
+
+      // not listening for removeListener, no need to emit
+      if (!events.removeListener) {
+        if (arguments.length === 0) {
+          this._events = objectCreate(null);
+          this._eventsCount = 0;
+        } else if (events[type]) {
+          if (--this._eventsCount === 0)
+            this._events = objectCreate(null);
+          else
+            delete events[type];
+        }
+        return this;
+      }
+
+      // emit removeListener for all listeners on all events
+      if (arguments.length === 0) {
+        var keys = objectKeys(events);
+        var key;
+        for (i = 0; i < keys.length; ++i) {
+          key = keys[i];
+          if (key === 'removeListener') continue;
+          this.removeAllListeners(key);
+        }
+        this.removeAllListeners('removeListener');
+        this._events = objectCreate(null);
+        this._eventsCount = 0;
+        return this;
+      }
+
+      listeners = events[type];
+
+      if (typeof listeners === 'function') {
+        this.removeListener(type, listeners);
+      } else if (listeners) {
+        // LIFO order
+        for (i = listeners.length - 1; i >= 0; i--) {
+          this.removeListener(type, listeners[i]);
+        }
+      }
+
+      return this;
+    };
+
+EventEmitter.prototype.listeners = function listeners(type) {
+  var evlistener;
+  var ret;
+  var events = this._events;
+
+  if (!events)
+    ret = [];
+  else {
+    evlistener = events[type];
+    if (!evlistener)
+      ret = [];
+    else if (typeof evlistener === 'function')
+      ret = [evlistener.listener || evlistener];
+    else
+      ret = unwrapListeners(evlistener);
+  }
+
+  return ret;
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  if (typeof emitter.listenerCount === 'function') {
+    return emitter.listenerCount(type);
+  } else {
+    return listenerCount.call(emitter, type);
+  }
+};
+
+EventEmitter.prototype.listenerCount = listenerCount;
+function listenerCount(type) {
+  var events = this._events;
+
+  if (events) {
+    var evlistener = events[type];
+
+    if (typeof evlistener === 'function') {
+      return 1;
+    } else if (evlistener) {
+      return evlistener.length;
+    }
+  }
+
+  return 0;
+}
+
+EventEmitter.prototype.eventNames = function eventNames() {
+  return this._eventsCount > 0 ? Reflect.ownKeys(this._events) : [];
+};
+
+// About 1.5x faster than the two-arg version of Array#splice().
+function spliceOne(list, index) {
+  for (var i = index, k = i + 1, n = list.length; k < n; i += 1, k += 1)
+    list[i] = list[k];
+  list.pop();
+}
+
+function arrayClone(arr, n) {
+  var copy = new Array(n);
+  for (var i = 0; i < n; ++i)
+    copy[i] = arr[i];
+  return copy;
+}
+
+function unwrapListeners(arr) {
+  var ret = new Array(arr.length);
+  for (var i = 0; i < ret.length; ++i) {
+    ret[i] = arr[i].listener || arr[i];
+  }
+  return ret;
+}
+
+function objectCreatePolyfill(proto) {
+  var F = function() {};
+  F.prototype = proto;
+  return new F;
+}
+function objectKeysPolyfill(obj) {
+  var keys = [];
+  for (var k in obj) if (Object.prototype.hasOwnProperty.call(obj, k)) {
+    keys.push(k);
+  }
+  return k;
+}
+function functionBindPolyfill(context) {
+  var fn = this;
+  return function () {
+    return fn.apply(context, arguments);
+  };
+}
+
+},{}],76:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+/*<replacement>*/
+
+var Buffer = require('safe-buffer').Buffer;
+/*</replacement>*/
+
+var isEncoding = Buffer.isEncoding || function (encoding) {
+  encoding = '' + encoding;
+  switch (encoding && encoding.toLowerCase()) {
+    case 'hex':case 'utf8':case 'utf-8':case 'ascii':case 'binary':case 'base64':case 'ucs2':case 'ucs-2':case 'utf16le':case 'utf-16le':case 'raw':
+      return true;
+    default:
+      return false;
+  }
+};
+
+function _normalizeEncoding(enc) {
+  if (!enc) return 'utf8';
+  var retried;
+  while (true) {
+    switch (enc) {
+      case 'utf8':
+      case 'utf-8':
+        return 'utf8';
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return 'utf16le';
+      case 'latin1':
+      case 'binary':
+        return 'latin1';
+      case 'base64':
+      case 'ascii':
+      case 'hex':
+        return enc;
+      default:
+        if (retried) return; // undefined
+        enc = ('' + enc).toLowerCase();
+        retried = true;
+    }
+  }
+};
+
+// Do not cache `Buffer.isEncoding` when checking encoding names as some
+// modules monkey-patch it to support additional encodings
+function normalizeEncoding(enc) {
+  var nenc = _normalizeEncoding(enc);
+  if (typeof nenc !== 'string' && (Buffer.isEncoding === isEncoding || !isEncoding(enc))) throw new Error('Unknown encoding: ' + enc);
+  return nenc || enc;
+}
+
+// StringDecoder provides an interface for efficiently splitting a series of
+// buffers into a series of JS strings without breaking apart multi-byte
+// characters.
+exports.StringDecoder = StringDecoder;
+function StringDecoder(encoding) {
+  this.encoding = normalizeEncoding(encoding);
+  var nb;
+  switch (this.encoding) {
+    case 'utf16le':
+      this.text = utf16Text;
+      this.end = utf16End;
+      nb = 4;
+      break;
+    case 'utf8':
+      this.fillLast = utf8FillLast;
+      nb = 4;
+      break;
+    case 'base64':
+      this.text = base64Text;
+      this.end = base64End;
+      nb = 3;
+      break;
+    default:
+      this.write = simpleWrite;
+      this.end = simpleEnd;
+      return;
+  }
+  this.lastNeed = 0;
+  this.lastTotal = 0;
+  this.lastChar = Buffer.allocUnsafe(nb);
+}
+
+StringDecoder.prototype.write = function (buf) {
+  if (buf.length === 0) return '';
+  var r;
+  var i;
+  if (this.lastNeed) {
+    r = this.fillLast(buf);
+    if (r === undefined) return '';
+    i = this.lastNeed;
+    this.lastNeed = 0;
+  } else {
+    i = 0;
+  }
+  if (i < buf.length) return r ? r + this.text(buf, i) : this.text(buf, i);
+  return r || '';
+};
+
+StringDecoder.prototype.end = utf8End;
+
+// Returns only complete characters in a Buffer
+StringDecoder.prototype.text = utf8Text;
+
+// Attempts to complete a partial non-UTF-8 character using bytes from a Buffer
+StringDecoder.prototype.fillLast = function (buf) {
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, this.lastTotal - this.lastNeed, 0, buf.length);
+  this.lastNeed -= buf.length;
+};
+
+// Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
+// continuation byte. If an invalid byte is detected, -2 is returned.
+function utf8CheckByte(byte) {
+  if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
+  return byte >> 6 === 0x02 ? -1 : -2;
+}
+
+// Checks at most 3 bytes at the end of a Buffer in order to detect an
+// incomplete multi-byte UTF-8 character. The total number of bytes (2, 3, or 4)
+// needed to complete the UTF-8 character (if applicable) are returned.
+function utf8CheckIncomplete(self, buf, i) {
+  var j = buf.length - 1;
+  if (j < i) return 0;
+  var nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 1;
+    return nb;
+  }
+  if (--j < i || nb === -2) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) self.lastNeed = nb - 2;
+    return nb;
+  }
+  if (--j < i || nb === -2) return 0;
+  nb = utf8CheckByte(buf[j]);
+  if (nb >= 0) {
+    if (nb > 0) {
+      if (nb === 2) nb = 0;else self.lastNeed = nb - 3;
+    }
+    return nb;
+  }
+  return 0;
+}
+
+// Validates as many continuation bytes for a multi-byte UTF-8 character as
+// needed or are available. If we see a non-continuation byte where we expect
+// one, we "replace" the validated continuation bytes we've seen so far with
+// a single UTF-8 replacement character ('\ufffd'), to match v8's UTF-8 decoding
+// behavior. The continuation byte check is included three times in the case
+// where all of the continuation bytes for a character exist in the same buffer.
+// It is also done this way as a slight performance increase instead of using a
+// loop.
+function utf8CheckExtraBytes(self, buf, p) {
+  if ((buf[0] & 0xC0) !== 0x80) {
+    self.lastNeed = 0;
+    return '\ufffd';
+  }
+  if (self.lastNeed > 1 && buf.length > 1) {
+    if ((buf[1] & 0xC0) !== 0x80) {
+      self.lastNeed = 1;
+      return '\ufffd';
+    }
+    if (self.lastNeed > 2 && buf.length > 2) {
+      if ((buf[2] & 0xC0) !== 0x80) {
+        self.lastNeed = 2;
+        return '\ufffd';
+      }
+    }
+  }
+}
+
+// Attempts to complete a multi-byte UTF-8 character using bytes from a Buffer.
+function utf8FillLast(buf) {
+  var p = this.lastTotal - this.lastNeed;
+  var r = utf8CheckExtraBytes(this, buf, p);
+  if (r !== undefined) return r;
+  if (this.lastNeed <= buf.length) {
+    buf.copy(this.lastChar, p, 0, this.lastNeed);
+    return this.lastChar.toString(this.encoding, 0, this.lastTotal);
+  }
+  buf.copy(this.lastChar, p, 0, buf.length);
+  this.lastNeed -= buf.length;
+}
+
+// Returns all complete UTF-8 characters in a Buffer. If the Buffer ended on a
+// partial character, the character's bytes are buffered until the required
+// number of bytes are available.
+function utf8Text(buf, i) {
+  var total = utf8CheckIncomplete(this, buf, i);
+  if (!this.lastNeed) return buf.toString('utf8', i);
+  this.lastTotal = total;
+  var end = buf.length - (total - this.lastNeed);
+  buf.copy(this.lastChar, 0, end);
+  return buf.toString('utf8', i, end);
+}
+
+// For UTF-8, a replacement character is added when ending on a partial
+// character.
+function utf8End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + '\ufffd';
+  return r;
+}
+
+// UTF-16LE typically needs two bytes per character, but even if we have an even
+// number of bytes available, we need to check if we end on a leading/high
+// surrogate. In that case, we need to wait for the next two bytes in order to
+// decode the last character properly.
+function utf16Text(buf, i) {
+  if ((buf.length - i) % 2 === 0) {
+    var r = buf.toString('utf16le', i);
+    if (r) {
+      var c = r.charCodeAt(r.length - 1);
+      if (c >= 0xD800 && c <= 0xDBFF) {
+        this.lastNeed = 2;
+        this.lastTotal = 4;
+        this.lastChar[0] = buf[buf.length - 2];
+        this.lastChar[1] = buf[buf.length - 1];
+        return r.slice(0, -1);
+      }
+    }
+    return r;
+  }
+  this.lastNeed = 1;
+  this.lastTotal = 2;
+  this.lastChar[0] = buf[buf.length - 1];
+  return buf.toString('utf16le', i, buf.length - 1);
+}
+
+// For UTF-16LE we do not explicitly append special replacement characters if we
+// end on a partial character, we simply let v8 handle that.
+function utf16End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) {
+    var end = this.lastTotal - this.lastNeed;
+    return r + this.lastChar.toString('utf16le', 0, end);
+  }
+  return r;
+}
+
+function base64Text(buf, i) {
+  var n = (buf.length - i) % 3;
+  if (n === 0) return buf.toString('base64', i);
+  this.lastNeed = 3 - n;
+  this.lastTotal = 3;
+  if (n === 1) {
+    this.lastChar[0] = buf[buf.length - 1];
+  } else {
+    this.lastChar[0] = buf[buf.length - 2];
+    this.lastChar[1] = buf[buf.length - 1];
+  }
+  return buf.toString('base64', i, buf.length - n);
+}
+
+function base64End(buf) {
+  var r = buf && buf.length ? this.write(buf) : '';
+  if (this.lastNeed) return r + this.lastChar.toString('base64', 0, 3 - this.lastNeed);
+  return r;
+}
+
+// Pass bytes on through for single-byte encodings (e.g. ascii, latin1, hex)
+function simpleWrite(buf) {
+  return buf.toString(this.encoding);
+}
+
+function simpleEnd(buf) {
+  return buf && buf.length ? this.write(buf) : '';
+}
+},{"safe-buffer":175}],77:[function(require,module,exports){
+var indexOf = function (xs, item) {
+    if (xs.indexOf) return xs.indexOf(item);
+    else for (var i = 0; i < xs.length; i++) {
+        if (xs[i] === item) return i;
+    }
+    return -1;
+};
+var Object_keys = function (obj) {
+    if (Object.keys) return Object.keys(obj)
+    else {
+        var res = [];
+        for (var key in obj) res.push(key)
+        return res;
+    }
+};
+
+var forEach = function (xs, fn) {
+    if (xs.forEach) return xs.forEach(fn)
+    else for (var i = 0; i < xs.length; i++) {
+        fn(xs[i], i, xs);
+    }
+};
+
+var defineProp = (function() {
+    try {
+        Object.defineProperty({}, '_', {});
+        return function(obj, name, value) {
+            Object.defineProperty(obj, name, {
+                writable: true,
+                enumerable: false,
+                configurable: true,
+                value: value
+            })
+        };
+    } catch(e) {
+        return function(obj, name, value) {
+            obj[name] = value;
+        };
+    }
+}());
+
+var globals = ['Array', 'Boolean', 'Date', 'Error', 'EvalError', 'Function',
+'Infinity', 'JSON', 'Math', 'NaN', 'Number', 'Object', 'RangeError',
+'ReferenceError', 'RegExp', 'String', 'SyntaxError', 'TypeError', 'URIError',
+'decodeURI', 'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape',
+'eval', 'isFinite', 'isNaN', 'parseFloat', 'parseInt', 'undefined', 'unescape'];
+
+function Context() {}
+Context.prototype = {};
+
+var Script = exports.Script = function NodeScript (code) {
+    if (!(this instanceof Script)) return new Script(code);
+    this.code = code;
+};
+
+Script.prototype.runInContext = function (context) {
+    if (!(context instanceof Context)) {
+        throw new TypeError("needs a 'context' argument.");
+    }
+    
+    var iframe = document.createElement('iframe');
+    if (!iframe.style) iframe.style = {};
+    iframe.style.display = 'none';
+    
+    document.body.appendChild(iframe);
+    
+    var win = iframe.contentWindow;
+    var wEval = win.eval, wExecScript = win.execScript;
+
+    if (!wEval && wExecScript) {
+        // win.eval() magically appears when this is called in IE:
+        wExecScript.call(win, 'null');
+        wEval = win.eval;
+    }
+    
+    forEach(Object_keys(context), function (key) {
+        win[key] = context[key];
+    });
+    forEach(globals, function (key) {
+        if (context[key]) {
+            win[key] = context[key];
+        }
+    });
+    
+    var winKeys = Object_keys(win);
+
+    var res = wEval.call(win, this.code);
+    
+    forEach(Object_keys(win), function (key) {
+        // Avoid copying circular objects like `top` and `window` by only
+        // updating existing context properties or new properties in the `win`
+        // that was only introduced after the eval.
+        if (key in context || indexOf(winKeys, key) === -1) {
+            context[key] = win[key];
+        }
+    });
+
+    forEach(globals, function (key) {
+        if (!(key in context)) {
+            defineProp(context, key, win[key]);
+        }
+    });
+    
+    document.body.removeChild(iframe);
+    
+    return res;
+};
+
+Script.prototype.runInThisContext = function () {
+    return eval(this.code); // maybe...
+};
+
+Script.prototype.runInNewContext = function (context) {
+    var ctx = Script.createContext(context);
+    var res = this.runInContext(ctx);
+
+    if (context) {
+        forEach(Object_keys(ctx), function (key) {
+            context[key] = ctx[key];
+        });
+    }
+
+    return res;
+};
+
+forEach(Object_keys(Script.prototype), function (name) {
+    exports[name] = Script[name] = function (code) {
+        var s = Script(code);
+        return s[name].apply(s, [].slice.call(arguments, 1));
+    };
+});
+
+exports.createScript = function (code) {
+    return exports.Script(code);
+};
+
+exports.createContext = Script.createContext = function (context) {
+    var copy = new Context();
+    if(typeof context === 'object') {
+        forEach(Object_keys(context), function (key) {
+            copy[key] = context[key];
+        });
+    }
+    return copy;
+};
+
+},{}],78:[function(require,module,exports){
 (function (Buffer){
 module.exports = function xor (a, b) {
   var length = Math.min(a.length, b.length)
@@ -8093,7 +10113,7 @@ module.exports = function xor (a, b) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":52}],52:[function(require,module,exports){
+},{"buffer":79}],79:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -9809,7 +11829,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":20,"ieee754":104}],53:[function(require,module,exports){
+},{"base64-js":44,"ieee754":130}],80:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('stream').Transform
 var StringDecoder = require('string_decoder').StringDecoder
@@ -9910,7 +11930,7 @@ CipherBase.prototype._toString = function (value, enc, fin) {
 
 module.exports = CipherBase
 
-},{"inherits":106,"safe-buffer":148,"stream":157,"string_decoder":158}],54:[function(require,module,exports){
+},{"inherits":131,"safe-buffer":175,"stream":184,"string_decoder":76}],81:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10021,7 +12041,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":107}],55:[function(require,module,exports){
+},{"../../is-buffer/index.js":132}],82:[function(require,module,exports){
 (function (Buffer){
 var elliptic = require('elliptic');
 var BN = require('bn.js');
@@ -10147,7 +12167,7 @@ function formatReturnValue(bn, enc, len) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"bn.js":21,"buffer":52,"elliptic":72}],56:[function(require,module,exports){
+},{"bn.js":45,"buffer":79,"elliptic":99}],83:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var inherits = require('inherits')
@@ -10203,7 +12223,7 @@ module.exports = function createHash (alg) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./md5":58,"buffer":52,"cipher-base":53,"inherits":106,"ripemd160":147,"sha.js":150}],57:[function(require,module,exports){
+},{"./md5":85,"buffer":79,"cipher-base":80,"inherits":131,"ripemd160":174,"sha.js":177}],84:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var intSize = 4
@@ -10237,7 +12257,7 @@ module.exports = function hash (buf, fn) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":52}],58:[function(require,module,exports){
+},{"buffer":79}],85:[function(require,module,exports){
 'use strict'
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
@@ -10390,7 +12410,7 @@ module.exports = function md5 (buf) {
   return makeHash(buf, core_md5)
 }
 
-},{"./make-hash":57}],59:[function(require,module,exports){
+},{"./make-hash":84}],86:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var Legacy = require('./legacy')
@@ -10454,7 +12474,7 @@ module.exports = function createHmac (alg, key) {
   return new Hmac(alg, key)
 }
 
-},{"./legacy":60,"cipher-base":53,"create-hash/md5":58,"inherits":106,"ripemd160":147,"safe-buffer":148,"sha.js":150}],60:[function(require,module,exports){
+},{"./legacy":87,"cipher-base":80,"create-hash/md5":85,"inherits":131,"ripemd160":174,"safe-buffer":175,"sha.js":177}],87:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var Buffer = require('safe-buffer').Buffer
@@ -10502,7 +12522,7 @@ Hmac.prototype._final = function () {
 }
 module.exports = Hmac
 
-},{"cipher-base":53,"inherits":106,"safe-buffer":148}],61:[function(require,module,exports){
+},{"cipher-base":80,"inherits":131,"safe-buffer":175}],88:[function(require,module,exports){
 'use strict'
 
 exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes')
@@ -10601,7 +12621,7 @@ exports.constants = {
   'POINT_CONVERSION_HYBRID': 6
 }
 
-},{"browserify-cipher":41,"browserify-sign":48,"browserify-sign/algos":45,"create-ecdh":55,"create-hash":56,"create-hmac":59,"diffie-hellman":68,"pbkdf2":119,"public-encrypt":126,"randombytes":132,"randomfill":133}],62:[function(require,module,exports){
+},{"browserify-cipher":65,"browserify-sign":72,"browserify-sign/algos":69,"create-ecdh":82,"create-hash":83,"create-hmac":86,"diffie-hellman":95,"pbkdf2":146,"public-encrypt":153,"randombytes":159,"randomfill":160}],89:[function(require,module,exports){
 'use strict';
 
 exports.utils = require('./des/utils');
@@ -10610,7 +12630,7 @@ exports.DES = require('./des/des');
 exports.CBC = require('./des/cbc');
 exports.EDE = require('./des/ede');
 
-},{"./des/cbc":63,"./des/cipher":64,"./des/des":65,"./des/ede":66,"./des/utils":67}],63:[function(require,module,exports){
+},{"./des/cbc":90,"./des/cipher":91,"./des/des":92,"./des/ede":93,"./des/utils":94}],90:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -10677,7 +12697,7 @@ proto._update = function _update(inp, inOff, out, outOff) {
   }
 };
 
-},{"inherits":106,"minimalistic-assert":112}],64:[function(require,module,exports){
+},{"inherits":131,"minimalistic-assert":139}],91:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -10820,7 +12840,7 @@ Cipher.prototype._finalDecrypt = function _finalDecrypt() {
   return this._unpad(out);
 };
 
-},{"minimalistic-assert":112}],65:[function(require,module,exports){
+},{"minimalistic-assert":139}],92:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -10965,7 +12985,7 @@ DES.prototype._decrypt = function _decrypt(state, lStart, rStart, out, off) {
   utils.rip(l, r, out, off);
 };
 
-},{"../des":62,"inherits":106,"minimalistic-assert":112}],66:[function(require,module,exports){
+},{"../des":89,"inherits":131,"minimalistic-assert":139}],93:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -11022,7 +13042,7 @@ EDE.prototype._update = function _update(inp, inOff, out, outOff) {
 EDE.prototype._pad = DES.prototype._pad;
 EDE.prototype._unpad = DES.prototype._unpad;
 
-},{"../des":62,"inherits":106,"minimalistic-assert":112}],67:[function(require,module,exports){
+},{"../des":89,"inherits":131,"minimalistic-assert":139}],94:[function(require,module,exports){
 'use strict';
 
 exports.readUInt32BE = function readUInt32BE(bytes, off) {
@@ -11280,7 +13300,7 @@ exports.padSplit = function padSplit(num, size, group) {
   return out.join(' ');
 };
 
-},{}],68:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 (function (Buffer){
 var generatePrime = require('./lib/generatePrime')
 var primes = require('./lib/primes.json')
@@ -11326,7 +13346,7 @@ exports.DiffieHellmanGroup = exports.createDiffieHellmanGroup = exports.getDiffi
 exports.createDiffieHellman = exports.DiffieHellman = createDiffieHellman
 
 }).call(this,require("buffer").Buffer)
-},{"./lib/dh":69,"./lib/generatePrime":70,"./lib/primes.json":71,"buffer":52}],69:[function(require,module,exports){
+},{"./lib/dh":96,"./lib/generatePrime":97,"./lib/primes.json":98,"buffer":79}],96:[function(require,module,exports){
 (function (Buffer){
 var BN = require('bn.js');
 var MillerRabin = require('miller-rabin');
@@ -11494,7 +13514,7 @@ function formatReturnValue(bn, enc) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./generatePrime":70,"bn.js":21,"buffer":52,"miller-rabin":111,"randombytes":132}],70:[function(require,module,exports){
+},{"./generatePrime":97,"bn.js":45,"buffer":79,"miller-rabin":138,"randombytes":159}],97:[function(require,module,exports){
 var randomBytes = require('randombytes');
 module.exports = findPrime;
 findPrime.simpleSieve = simpleSieve;
@@ -11601,7 +13621,7 @@ function findPrime(bits, gen) {
 
 }
 
-},{"bn.js":21,"miller-rabin":111,"randombytes":132}],71:[function(require,module,exports){
+},{"bn.js":45,"miller-rabin":138,"randombytes":159}],98:[function(require,module,exports){
 module.exports={
     "modp1": {
         "gen": "02",
@@ -11636,7 +13656,7 @@ module.exports={
         "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c93402849236c3fab4d27c7026c1d4dcb2602646dec9751e763dba37bdf8ff9406ad9e530ee5db382f413001aeb06a53ed9027d831179727b0865a8918da3edbebcf9b14ed44ce6cbaced4bb1bdb7f1447e6cc254b332051512bd7af426fb8f401378cd2bf5983ca01c64b92ecf032ea15d1721d03f482d7ce6e74fef6d55e702f46980c82b5a84031900b1c9e59e7c97fbec7e8f323a97a7e36cc88be0f1d45b7ff585ac54bd407b22b4154aacc8f6d7ebf48e1d814cc5ed20f8037e0a79715eef29be32806a1d58bb7c5da76f550aa3d8a1fbff0eb19ccb1a313d55cda56c9ec2ef29632387fe8d76e3c0468043e8f663f4860ee12bf2d5b0b7474d6e694f91e6dbe115974a3926f12fee5e438777cb6a932df8cd8bec4d073b931ba3bc832b68d9dd300741fa7bf8afc47ed2576f6936ba424663aab639c5ae4f5683423b4742bf1c978238f16cbe39d652de3fdb8befc848ad922222e04a4037c0713eb57a81a23f0c73473fc646cea306b4bcbc8862f8385ddfa9d4b7fa2c087e879683303ed5bdd3a062b3cf5b3a278a66d2a13f83f44f82ddf310ee074ab6a364597e899a0255dc164f31cc50846851df9ab48195ded7ea1b1d510bd7ee74d73faf36bc31ecfa268359046f4eb879f924009438b481c6cd7889a002ed5ee382bc9190da6fc026e479558e4475677e9aa9e3050e2765694dfc81f56e880b96e7160c980dd98edd3dfffffffffffffffff"
     }
 }
-},{}],72:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 'use strict';
 
 var elliptic = exports;
@@ -11651,7 +13671,7 @@ elliptic.curves = require('./elliptic/curves');
 elliptic.ec = require('./elliptic/ec');
 elliptic.eddsa = require('./elliptic/eddsa');
 
-},{"../package.json":87,"./elliptic/curve":75,"./elliptic/curves":78,"./elliptic/ec":79,"./elliptic/eddsa":82,"./elliptic/utils":86,"brorand":22}],73:[function(require,module,exports){
+},{"../package.json":114,"./elliptic/curve":102,"./elliptic/curves":105,"./elliptic/ec":106,"./elliptic/eddsa":109,"./elliptic/utils":113,"brorand":46}],100:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -12028,7 +14048,7 @@ BasePoint.prototype.dblp = function dblp(k) {
   return r;
 };
 
-},{"../../elliptic":72,"bn.js":21}],74:[function(require,module,exports){
+},{"../../elliptic":99,"bn.js":45}],101:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -12463,7 +14483,7 @@ Point.prototype.eqXToP = function eqXToP(x) {
 Point.prototype.toP = Point.prototype.normalize;
 Point.prototype.mixedAdd = Point.prototype.add;
 
-},{"../../elliptic":72,"../curve":75,"bn.js":21,"inherits":106}],75:[function(require,module,exports){
+},{"../../elliptic":99,"../curve":102,"bn.js":45,"inherits":131}],102:[function(require,module,exports){
 'use strict';
 
 var curve = exports;
@@ -12473,7 +14493,7 @@ curve.short = require('./short');
 curve.mont = require('./mont');
 curve.edwards = require('./edwards');
 
-},{"./base":73,"./edwards":74,"./mont":76,"./short":77}],76:[function(require,module,exports){
+},{"./base":100,"./edwards":101,"./mont":103,"./short":104}],103:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -12655,7 +14675,7 @@ Point.prototype.getX = function getX() {
   return this.x.fromRed();
 };
 
-},{"../../elliptic":72,"../curve":75,"bn.js":21,"inherits":106}],77:[function(require,module,exports){
+},{"../../elliptic":99,"../curve":102,"bn.js":45,"inherits":131}],104:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -13595,7 +15615,7 @@ JPoint.prototype.isInfinity = function isInfinity() {
   return this.z.cmpn(0) === 0;
 };
 
-},{"../../elliptic":72,"../curve":75,"bn.js":21,"inherits":106}],78:[function(require,module,exports){
+},{"../../elliptic":99,"../curve":102,"bn.js":45,"inherits":131}],105:[function(require,module,exports){
 'use strict';
 
 var curves = exports;
@@ -13802,7 +15822,7 @@ defineCurve('secp256k1', {
   ]
 });
 
-},{"../elliptic":72,"./precomputed/secp256k1":85,"hash.js":91}],79:[function(require,module,exports){
+},{"../elliptic":99,"./precomputed/secp256k1":112,"hash.js":117}],106:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -14044,7 +16064,7 @@ EC.prototype.getKeyRecoveryParam = function(e, signature, Q, enc) {
   throw new Error('Unable to find valid recovery factor');
 };
 
-},{"../../elliptic":72,"./key":80,"./signature":81,"bn.js":21,"hmac-drbg":103}],80:[function(require,module,exports){
+},{"../../elliptic":99,"./key":107,"./signature":108,"bn.js":45,"hmac-drbg":129}],107:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -14165,7 +16185,7 @@ KeyPair.prototype.inspect = function inspect() {
          ' pub: ' + (this.pub && this.pub.inspect()) + ' >';
 };
 
-},{"../../elliptic":72,"bn.js":21}],81:[function(require,module,exports){
+},{"../../elliptic":99,"bn.js":45}],108:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -14302,7 +16322,7 @@ Signature.prototype.toDER = function toDER(enc) {
   return utils.encode(res, enc);
 };
 
-},{"../../elliptic":72,"bn.js":21}],82:[function(require,module,exports){
+},{"../../elliptic":99,"bn.js":45}],109:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -14422,7 +16442,7 @@ EDDSA.prototype.isPoint = function isPoint(val) {
   return val instanceof this.pointClass;
 };
 
-},{"../../elliptic":72,"./key":83,"./signature":84,"hash.js":91}],83:[function(require,module,exports){
+},{"../../elliptic":99,"./key":110,"./signature":111,"hash.js":117}],110:[function(require,module,exports){
 'use strict';
 
 var elliptic = require('../../elliptic');
@@ -14520,7 +16540,7 @@ KeyPair.prototype.getPublic = function getPublic(enc) {
 
 module.exports = KeyPair;
 
-},{"../../elliptic":72}],84:[function(require,module,exports){
+},{"../../elliptic":99}],111:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -14588,7 +16608,7 @@ Signature.prototype.toHex = function toHex() {
 
 module.exports = Signature;
 
-},{"../../elliptic":72,"bn.js":21}],85:[function(require,module,exports){
+},{"../../elliptic":99,"bn.js":45}],112:[function(require,module,exports){
 module.exports = {
   doubles: {
     step: 4,
@@ -15370,7 +17390,7 @@ module.exports = {
   }
 };
 
-},{}],86:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 'use strict';
 
 var utils = exports;
@@ -15492,32 +17512,38 @@ function intFromLE(bytes) {
 utils.intFromLE = intFromLE;
 
 
-},{"bn.js":21,"minimalistic-assert":112,"minimalistic-crypto-utils":113}],87:[function(require,module,exports){
+},{"bn.js":45,"minimalistic-assert":139,"minimalistic-crypto-utils":140}],114:[function(require,module,exports){
 module.exports={
-  "_from": "elliptic@^6.0.0",
+  "_args": [
+    [
+      "elliptic@6.4.0",
+      "/Users/ryanallen/Development/chrome_extensions/nCode"
+    ]
+  ],
+  "_development": true,
+  "_from": "elliptic@6.4.0",
   "_id": "elliptic@6.4.0",
   "_inBundle": false,
   "_integrity": "sha1-ysmvh2LIWDYYcAPI3+GT5eLq5d8=",
-  "_location": "/browserify/elliptic",
+  "_location": "/elliptic",
   "_phantomChildren": {},
   "_requested": {
-    "type": "range",
+    "type": "version",
     "registry": true,
-    "raw": "elliptic@^6.0.0",
+    "raw": "elliptic@6.4.0",
     "name": "elliptic",
     "escapedName": "elliptic",
-    "rawSpec": "^6.0.0",
+    "rawSpec": "6.4.0",
     "saveSpec": null,
-    "fetchSpec": "^6.0.0"
+    "fetchSpec": "6.4.0"
   },
   "_requiredBy": [
-    "/browserify/browserify-sign",
-    "/browserify/create-ecdh"
+    "/browserify-sign",
+    "/create-ecdh"
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.0.tgz",
-  "_shasum": "cac9af8762c85836187003c8dfe193e5e2eae5df",
-  "_spec": "elliptic@^6.0.0",
-  "_where": "/usr/local/lib/node_modules/browserify/node_modules/browserify-sign",
+  "_spec": "6.4.0",
+  "_where": "/Users/ryanallen/Development/chrome_extensions/nCode",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
@@ -15525,7 +17551,6 @@ module.exports={
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
   },
-  "bundleDependencies": false,
   "dependencies": {
     "bn.js": "^4.4.0",
     "brorand": "^1.0.1",
@@ -15535,7 +17560,6 @@ module.exports={
     "minimalistic-assert": "^1.0.0",
     "minimalistic-crypto-utils": "^1.0.0"
   },
-  "deprecated": false,
   "description": "EC cryptography",
   "devDependencies": {
     "brfs": "^1.4.3",
@@ -15581,311 +17605,7 @@ module.exports={
   "version": "6.4.0"
 }
 
-},{}],88:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-function EventEmitter() {
-  this._events = this._events || {};
-  this._maxListeners = this._maxListeners || undefined;
-}
-module.exports = EventEmitter;
-
-// Backwards-compat with node 0.10.x
-EventEmitter.EventEmitter = EventEmitter;
-
-EventEmitter.prototype._events = undefined;
-EventEmitter.prototype._maxListeners = undefined;
-
-// By default EventEmitters will print a warning if more than 10 listeners are
-// added to it. This is a useful default which helps finding memory leaks.
-EventEmitter.defaultMaxListeners = 10;
-
-// Obviously not all Emitters should be limited to 10. This function allows
-// that to be increased. Set to zero for unlimited.
-EventEmitter.prototype.setMaxListeners = function(n) {
-  if (!isNumber(n) || n < 0 || isNaN(n))
-    throw TypeError('n must be a positive number');
-  this._maxListeners = n;
-  return this;
-};
-
-EventEmitter.prototype.emit = function(type) {
-  var er, handler, len, args, i, listeners;
-
-  if (!this._events)
-    this._events = {};
-
-  // If there is no 'error' event listener then throw.
-  if (type === 'error') {
-    if (!this._events.error ||
-        (isObject(this._events.error) && !this._events.error.length)) {
-      er = arguments[1];
-      if (er instanceof Error) {
-        throw er; // Unhandled 'error' event
-      } else {
-        // At least give some kind of context to the user
-        var err = new Error('Uncaught, unspecified "error" event. (' + er + ')');
-        err.context = er;
-        throw err;
-      }
-    }
-  }
-
-  handler = this._events[type];
-
-  if (isUndefined(handler))
-    return false;
-
-  if (isFunction(handler)) {
-    switch (arguments.length) {
-      // fast cases
-      case 1:
-        handler.call(this);
-        break;
-      case 2:
-        handler.call(this, arguments[1]);
-        break;
-      case 3:
-        handler.call(this, arguments[1], arguments[2]);
-        break;
-      // slower
-      default:
-        args = Array.prototype.slice.call(arguments, 1);
-        handler.apply(this, args);
-    }
-  } else if (isObject(handler)) {
-    args = Array.prototype.slice.call(arguments, 1);
-    listeners = handler.slice();
-    len = listeners.length;
-    for (i = 0; i < len; i++)
-      listeners[i].apply(this, args);
-  }
-
-  return true;
-};
-
-EventEmitter.prototype.addListener = function(type, listener) {
-  var m;
-
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  if (!this._events)
-    this._events = {};
-
-  // To avoid recursion in the case that type === "newListener"! Before
-  // adding it to the listeners, first emit "newListener".
-  if (this._events.newListener)
-    this.emit('newListener', type,
-              isFunction(listener.listener) ?
-              listener.listener : listener);
-
-  if (!this._events[type])
-    // Optimize the case of one listener. Don't need the extra array object.
-    this._events[type] = listener;
-  else if (isObject(this._events[type]))
-    // If we've already got an array, just append.
-    this._events[type].push(listener);
-  else
-    // Adding the second element, need to change to array.
-    this._events[type] = [this._events[type], listener];
-
-  // Check for listener leak
-  if (isObject(this._events[type]) && !this._events[type].warned) {
-    if (!isUndefined(this._maxListeners)) {
-      m = this._maxListeners;
-    } else {
-      m = EventEmitter.defaultMaxListeners;
-    }
-
-    if (m && m > 0 && this._events[type].length > m) {
-      this._events[type].warned = true;
-      console.error('(node) warning: possible EventEmitter memory ' +
-                    'leak detected. %d listeners added. ' +
-                    'Use emitter.setMaxListeners() to increase limit.',
-                    this._events[type].length);
-      if (typeof console.trace === 'function') {
-        // not supported in IE 10
-        console.trace();
-      }
-    }
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-EventEmitter.prototype.once = function(type, listener) {
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  var fired = false;
-
-  function g() {
-    this.removeListener(type, g);
-
-    if (!fired) {
-      fired = true;
-      listener.apply(this, arguments);
-    }
-  }
-
-  g.listener = listener;
-  this.on(type, g);
-
-  return this;
-};
-
-// emits a 'removeListener' event iff the listener was removed
-EventEmitter.prototype.removeListener = function(type, listener) {
-  var list, position, length, i;
-
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  if (!this._events || !this._events[type])
-    return this;
-
-  list = this._events[type];
-  length = list.length;
-  position = -1;
-
-  if (list === listener ||
-      (isFunction(list.listener) && list.listener === listener)) {
-    delete this._events[type];
-    if (this._events.removeListener)
-      this.emit('removeListener', type, listener);
-
-  } else if (isObject(list)) {
-    for (i = length; i-- > 0;) {
-      if (list[i] === listener ||
-          (list[i].listener && list[i].listener === listener)) {
-        position = i;
-        break;
-      }
-    }
-
-    if (position < 0)
-      return this;
-
-    if (list.length === 1) {
-      list.length = 0;
-      delete this._events[type];
-    } else {
-      list.splice(position, 1);
-    }
-
-    if (this._events.removeListener)
-      this.emit('removeListener', type, listener);
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.removeAllListeners = function(type) {
-  var key, listeners;
-
-  if (!this._events)
-    return this;
-
-  // not listening for removeListener, no need to emit
-  if (!this._events.removeListener) {
-    if (arguments.length === 0)
-      this._events = {};
-    else if (this._events[type])
-      delete this._events[type];
-    return this;
-  }
-
-  // emit removeListener for all listeners on all events
-  if (arguments.length === 0) {
-    for (key in this._events) {
-      if (key === 'removeListener') continue;
-      this.removeAllListeners(key);
-    }
-    this.removeAllListeners('removeListener');
-    this._events = {};
-    return this;
-  }
-
-  listeners = this._events[type];
-
-  if (isFunction(listeners)) {
-    this.removeListener(type, listeners);
-  } else if (listeners) {
-    // LIFO order
-    while (listeners.length)
-      this.removeListener(type, listeners[listeners.length - 1]);
-  }
-  delete this._events[type];
-
-  return this;
-};
-
-EventEmitter.prototype.listeners = function(type) {
-  var ret;
-  if (!this._events || !this._events[type])
-    ret = [];
-  else if (isFunction(this._events[type]))
-    ret = [this._events[type]];
-  else
-    ret = this._events[type].slice();
-  return ret;
-};
-
-EventEmitter.prototype.listenerCount = function(type) {
-  if (this._events) {
-    var evlistener = this._events[type];
-
-    if (isFunction(evlistener))
-      return 1;
-    else if (evlistener)
-      return evlistener.length;
-  }
-  return 0;
-};
-
-EventEmitter.listenerCount = function(emitter, type) {
-  return emitter.listenerCount(type);
-};
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-
-},{}],89:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var MD5 = require('md5.js')
 
@@ -15932,7 +17652,7 @@ function EVP_BytesToKey (password, salt, keyBits, ivLen) {
 
 module.exports = EVP_BytesToKey
 
-},{"md5.js":109,"safe-buffer":148}],90:[function(require,module,exports){
+},{"md5.js":136,"safe-buffer":175}],116:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var Transform = require('stream').Transform
@@ -16019,7 +17739,7 @@ HashBase.prototype._digest = function () {
 module.exports = HashBase
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":52,"inherits":106,"stream":157}],91:[function(require,module,exports){
+},{"buffer":79,"inherits":131,"stream":184}],117:[function(require,module,exports){
 var hash = exports;
 
 hash.utils = require('./hash/utils');
@@ -16036,7 +17756,7 @@ hash.sha384 = hash.sha.sha384;
 hash.sha512 = hash.sha.sha512;
 hash.ripemd160 = hash.ripemd.ripemd160;
 
-},{"./hash/common":92,"./hash/hmac":93,"./hash/ripemd":94,"./hash/sha":95,"./hash/utils":102}],92:[function(require,module,exports){
+},{"./hash/common":118,"./hash/hmac":119,"./hash/ripemd":120,"./hash/sha":121,"./hash/utils":128}],118:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -16130,7 +17850,7 @@ BlockHash.prototype._pad = function pad() {
   return res;
 };
 
-},{"./utils":102,"minimalistic-assert":112}],93:[function(require,module,exports){
+},{"./utils":128,"minimalistic-assert":139}],119:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -16179,7 +17899,7 @@ Hmac.prototype.digest = function digest(enc) {
   return this.outer.digest(enc);
 };
 
-},{"./utils":102,"minimalistic-assert":112}],94:[function(require,module,exports){
+},{"./utils":128,"minimalistic-assert":139}],120:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -16327,7 +18047,7 @@ var sh = [
   8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
 ];
 
-},{"./common":92,"./utils":102}],95:[function(require,module,exports){
+},{"./common":118,"./utils":128}],121:[function(require,module,exports){
 'use strict';
 
 exports.sha1 = require('./sha/1');
@@ -16336,7 +18056,7 @@ exports.sha256 = require('./sha/256');
 exports.sha384 = require('./sha/384');
 exports.sha512 = require('./sha/512');
 
-},{"./sha/1":96,"./sha/224":97,"./sha/256":98,"./sha/384":99,"./sha/512":100}],96:[function(require,module,exports){
+},{"./sha/1":122,"./sha/224":123,"./sha/256":124,"./sha/384":125,"./sha/512":126}],122:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -16412,7 +18132,7 @@ SHA1.prototype._digest = function digest(enc) {
     return utils.split32(this.h, 'big');
 };
 
-},{"../common":92,"../utils":102,"./common":101}],97:[function(require,module,exports){
+},{"../common":118,"../utils":128,"./common":127}],123:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -16444,7 +18164,7 @@ SHA224.prototype._digest = function digest(enc) {
 };
 
 
-},{"../utils":102,"./256":98}],98:[function(require,module,exports){
+},{"../utils":128,"./256":124}],124:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -16551,7 +18271,7 @@ SHA256.prototype._digest = function digest(enc) {
     return utils.split32(this.h, 'big');
 };
 
-},{"../common":92,"../utils":102,"./common":101,"minimalistic-assert":112}],99:[function(require,module,exports){
+},{"../common":118,"../utils":128,"./common":127,"minimalistic-assert":139}],125:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -16588,7 +18308,7 @@ SHA384.prototype._digest = function digest(enc) {
     return utils.split32(this.h.slice(0, 12), 'big');
 };
 
-},{"../utils":102,"./512":100}],100:[function(require,module,exports){
+},{"../utils":128,"./512":126}],126:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -16920,7 +18640,7 @@ function g1_512_lo(xh, xl) {
   return r;
 }
 
-},{"../common":92,"../utils":102,"minimalistic-assert":112}],101:[function(require,module,exports){
+},{"../common":118,"../utils":128,"minimalistic-assert":139}],127:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -16971,7 +18691,7 @@ function g1_256(x) {
 }
 exports.g1_256 = g1_256;
 
-},{"../utils":102}],102:[function(require,module,exports){
+},{"../utils":128}],128:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -17226,7 +18946,7 @@ function shr64_lo(ah, al, num) {
 }
 exports.shr64_lo = shr64_lo;
 
-},{"inherits":106,"minimalistic-assert":112}],103:[function(require,module,exports){
+},{"inherits":131,"minimalistic-assert":139}],129:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -17341,7 +19061,7 @@ HmacDRBG.prototype.generate = function generate(len, enc, add, addEnc) {
   return utils.encode(res, enc);
 };
 
-},{"hash.js":91,"minimalistic-assert":112,"minimalistic-crypto-utils":113}],104:[function(require,module,exports){
+},{"hash.js":117,"minimalistic-assert":139,"minimalistic-crypto-utils":140}],130:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -17427,18 +19147,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],105:[function(require,module,exports){
-
-var indexOf = [].indexOf;
-
-module.exports = function(arr, obj){
-  if (indexOf) return arr.indexOf(obj);
-  for (var i = 0; i < arr.length; ++i) {
-    if (arr[i] === obj) return i;
-  }
-  return -1;
-};
-},{}],106:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -17463,7 +19172,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],107:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -17486,14 +19195,225 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],108:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],109:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
+module.exports = require('./lib/jwt');
+
+},{"./lib/jwt":135}],135:[function(require,module,exports){
+(function (Buffer){
+/*
+ * jwt-simple
+ *
+ * JSON Web Token encode and decode module for node.js
+ *
+ * Copyright(c) 2011 Kazuhito Hokamura
+ * MIT Licensed
+ */
+
+/**
+ * module dependencies
+ */
+var crypto = require('crypto');
+
+
+/**
+ * support algorithm mapping
+ */
+var algorithmMap = {
+  HS256: 'sha256',
+  HS384: 'sha384',
+  HS512: 'sha512',
+  RS256: 'RSA-SHA256'
+};
+
+/**
+ * Map algorithm to hmac or sign type, to determine which crypto function to use
+ */
+var typeMap = {
+  HS256: 'hmac',
+  HS384: 'hmac',
+  HS512: 'hmac',
+  RS256: 'sign'
+};
+
+
+/**
+ * expose object
+ */
+var jwt = module.exports;
+
+
+/**
+ * version
+ */
+jwt.version = '0.5.1';
+
+/**
+ * Decode jwt
+ *
+ * @param {Object} token
+ * @param {String} key
+ * @param {Boolean} noVerify
+ * @param {String} algorithm
+ * @return {Object} payload
+ * @api public
+ */
+jwt.decode = function jwt_decode(token, key, noVerify, algorithm) {
+  // check token
+  if (!token) {
+    throw new Error('No token supplied');
+  }
+  // check segments
+  var segments = token.split('.');
+  if (segments.length !== 3) {
+    throw new Error('Not enough or too many segments');
+  }
+
+  // All segment should be base64
+  var headerSeg = segments[0];
+  var payloadSeg = segments[1];
+  var signatureSeg = segments[2];
+
+  // base64 decode and parse JSON
+  var header = JSON.parse(base64urlDecode(headerSeg));
+  var payload = JSON.parse(base64urlDecode(payloadSeg));
+
+  if (!noVerify) {
+    var signingMethod = algorithmMap[algorithm || header.alg];
+    var signingType = typeMap[algorithm || header.alg];
+    if (!signingMethod || !signingType) {
+      throw new Error('Algorithm not supported');
+    }
+
+    // verify signature. `sign` will return base64 string.
+    var signingInput = [headerSeg, payloadSeg].join('.');
+    if (!verify(signingInput, key, signingMethod, signingType, signatureSeg)) {
+      throw new Error('Signature verification failed');
+    }
+
+    // Support for nbf and exp claims.
+    // According to the RFC, they should be in seconds.
+    if (payload.nbf && Date.now() < payload.nbf*1000) {
+      throw new Error('Token not yet active');
+    }
+
+    if (payload.exp && Date.now() > payload.exp*1000) {
+      throw new Error('Token expired');
+    }
+  }
+
+  return payload;
+};
+
+
+/**
+ * Encode jwt
+ *
+ * @param {Object} payload
+ * @param {String} key
+ * @param {String} algorithm
+ * @param {Object} options
+ * @return {String} token
+ * @api public
+ */
+jwt.encode = function jwt_encode(payload, key, algorithm, options) {
+  // Check key
+  if (!key) {
+    throw new Error('Require key');
+  }
+
+  // Check algorithm, default is HS256
+  if (!algorithm) {
+    algorithm = 'HS256';
+  }
+
+  var signingMethod = algorithmMap[algorithm];
+  var signingType = typeMap[algorithm];
+  if (!signingMethod || !signingType) {
+    throw new Error('Algorithm not supported');
+  }
+
+  // header, typ is fixed value.
+  var header = { typ: 'JWT', alg: algorithm };
+  if (options && options.header) {
+    assignProperties(header, options.header);
+  }
+
+  // create segments, all segments should be base64 string
+  var segments = [];
+  segments.push(base64urlEncode(JSON.stringify(header)));
+  segments.push(base64urlEncode(JSON.stringify(payload)));
+  segments.push(sign(segments.join('.'), key, signingMethod, signingType));
+
+  return segments.join('.');
+};
+
+/**
+ * private util functions
+ */
+
+function assignProperties(dest, source) {
+  for (var attr in source) {
+    if (source.hasOwnProperty(attr)) {
+      dest[attr] = source[attr];
+    }
+  }
+}
+
+function verify(input, key, method, type, signature) {
+  if(type === "hmac") {
+    return (signature === sign(input, key, method, type));
+  }
+  else if(type == "sign") {
+    return crypto.createVerify(method)
+                 .update(input)
+                 .verify(key, base64urlUnescape(signature), 'base64');
+  }
+  else {
+    throw new Error('Algorithm type not recognized');
+  }
+}
+
+function sign(input, key, method, type) {
+  var base64str;
+  if(type === "hmac") {
+    base64str = crypto.createHmac(method, key).update(input).digest('base64');
+  }
+  else if(type == "sign") {
+    base64str = crypto.createSign(method).update(input).sign(key, 'base64');
+  }
+  else {
+    throw new Error('Algorithm type not recognized');
+  }
+
+  return base64urlEscape(base64str);
+}
+
+function base64urlDecode(str) {
+  return new Buffer(base64urlUnescape(str), 'base64').toString();
+}
+
+function base64urlUnescape(str) {
+  str += new Array(5 - str.length % 4).join('=');
+  return str.replace(/\-/g, '+').replace(/_/g, '/');
+}
+
+function base64urlEncode(str) {
+  return base64urlEscape(new Buffer(str).toString('base64'));
+}
+
+function base64urlEscape(str) {
+  return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":79,"crypto":88}],136:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var inherits = require('inherits')
@@ -17642,7 +19562,7 @@ function fnI (a, b, c, d, m, k, s) {
 module.exports = MD5
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":52,"hash-base":110,"inherits":106}],110:[function(require,module,exports){
+},{"buffer":79,"hash-base":137,"inherits":131}],137:[function(require,module,exports){
 'use strict'
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('stream').Transform
@@ -17739,7 +19659,7 @@ HashBase.prototype._digest = function () {
 
 module.exports = HashBase
 
-},{"inherits":106,"safe-buffer":148,"stream":157}],111:[function(require,module,exports){
+},{"inherits":131,"safe-buffer":175,"stream":184}],138:[function(require,module,exports){
 var bn = require('bn.js');
 var brorand = require('brorand');
 
@@ -17856,7 +19776,7 @@ MillerRabin.prototype.getDivisor = function getDivisor(n, k) {
   return false;
 };
 
-},{"bn.js":21,"brorand":22}],112:[function(require,module,exports){
+},{"bn.js":45,"brorand":46}],139:[function(require,module,exports){
 module.exports = assert;
 
 function assert(val, msg) {
@@ -17869,7 +19789,7 @@ assert.equal = function assertEqual(l, r, msg) {
     throw new Error(msg || ('Assertion failed: ' + l + ' != ' + r));
 };
 
-},{}],113:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 'use strict';
 
 var utils = exports;
@@ -17929,7 +19849,7 @@ utils.encode = function encode(arr, enc) {
     return arr;
 };
 
-},{}],114:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 module.exports={"2.16.840.1.101.3.4.1.1": "aes-128-ecb",
 "2.16.840.1.101.3.4.1.2": "aes-128-cbc",
 "2.16.840.1.101.3.4.1.3": "aes-128-ofb",
@@ -17943,7 +19863,7 @@ module.exports={"2.16.840.1.101.3.4.1.1": "aes-128-ecb",
 "2.16.840.1.101.3.4.1.43": "aes-256-ofb",
 "2.16.840.1.101.3.4.1.44": "aes-256-cfb"
 }
-},{}],115:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 // from https://github.com/indutny/self-signed/blob/gh-pages/lib/asn1.js
 // Fedor, you are amazing.
 'use strict'
@@ -18067,7 +19987,7 @@ exports.signature = asn1.define('signature', function () {
   )
 })
 
-},{"./certificate":116,"asn1.js":6}],116:[function(require,module,exports){
+},{"./certificate":143,"asn1.js":4}],143:[function(require,module,exports){
 // from https://github.com/Rantanen/node-dtls/blob/25a7dc861bda38cfeac93a723500eea4f0ac2e86/Certificate.js
 // thanks to @Rantanen
 
@@ -18157,7 +20077,7 @@ var X509Certificate = asn.define('X509Certificate', function () {
 
 module.exports = X509Certificate
 
-},{"asn1.js":6}],117:[function(require,module,exports){
+},{"asn1.js":4}],144:[function(require,module,exports){
 (function (Buffer){
 // adapted from https://github.com/apatil/pemstrip
 var findProc = /Proc-Type: 4,ENCRYPTED\n\r?DEK-Info: AES-((?:128)|(?:192)|(?:256))-CBC,([0-9A-H]+)\n\r?\n\r?([0-9A-z\n\r\+\/\=]+)\n\r?/m
@@ -18191,7 +20111,7 @@ module.exports = function (okey, password) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"browserify-aes":26,"buffer":52,"evp_bytestokey":89}],118:[function(require,module,exports){
+},{"browserify-aes":50,"buffer":79,"evp_bytestokey":115}],145:[function(require,module,exports){
 (function (Buffer){
 var asn1 = require('./asn1')
 var aesid = require('./aesid.json')
@@ -18301,13 +20221,13 @@ function decrypt (data, password) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./aesid.json":114,"./asn1":115,"./fixProc":117,"browserify-aes":26,"buffer":52,"pbkdf2":119}],119:[function(require,module,exports){
+},{"./aesid.json":141,"./asn1":142,"./fixProc":144,"browserify-aes":50,"buffer":79,"pbkdf2":146}],146:[function(require,module,exports){
 
 exports.pbkdf2 = require('./lib/async')
 
 exports.pbkdf2Sync = require('./lib/sync')
 
-},{"./lib/async":120,"./lib/sync":123}],120:[function(require,module,exports){
+},{"./lib/async":147,"./lib/sync":150}],147:[function(require,module,exports){
 (function (process,global){
 var checkParameters = require('./precondition')
 var defaultEncoding = require('./default-encoding')
@@ -18409,7 +20329,7 @@ module.exports = function (password, salt, iterations, keylen, digest, callback)
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./default-encoding":121,"./precondition":122,"./sync":123,"_process":125,"safe-buffer":148}],121:[function(require,module,exports){
+},{"./default-encoding":148,"./precondition":149,"./sync":150,"_process":152,"safe-buffer":175}],148:[function(require,module,exports){
 (function (process){
 var defaultEncoding
 /* istanbul ignore next */
@@ -18423,7 +20343,7 @@ if (process.browser) {
 module.exports = defaultEncoding
 
 }).call(this,require('_process'))
-},{"_process":125}],122:[function(require,module,exports){
+},{"_process":152}],149:[function(require,module,exports){
 var MAX_ALLOC = Math.pow(2, 30) - 1 // default in iojs
 module.exports = function (iterations, keylen) {
   if (typeof iterations !== 'number') {
@@ -18443,7 +20363,7 @@ module.exports = function (iterations, keylen) {
   }
 }
 
-},{}],123:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 var md5 = require('create-hash/md5')
 var rmd160 = require('ripemd160')
 var sha = require('sha.js')
@@ -18546,7 +20466,7 @@ function pbkdf2 (password, salt, iterations, keylen, digest) {
 
 module.exports = pbkdf2
 
-},{"./default-encoding":121,"./precondition":122,"create-hash/md5":58,"ripemd160":147,"safe-buffer":148,"sha.js":150}],124:[function(require,module,exports){
+},{"./default-encoding":148,"./precondition":149,"create-hash/md5":85,"ripemd160":174,"safe-buffer":175,"sha.js":177}],151:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -18593,7 +20513,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,require('_process'))
-},{"_process":125}],125:[function(require,module,exports){
+},{"_process":152}],152:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -18779,7 +20699,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],126:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 exports.publicEncrypt = require('./publicEncrypt');
 exports.privateDecrypt = require('./privateDecrypt');
 
@@ -18790,7 +20710,7 @@ exports.privateEncrypt = function privateEncrypt(key, buf) {
 exports.publicDecrypt = function publicDecrypt(key, buf) {
   return exports.privateDecrypt(key, buf, true);
 };
-},{"./privateDecrypt":128,"./publicEncrypt":129}],127:[function(require,module,exports){
+},{"./privateDecrypt":155,"./publicEncrypt":156}],154:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('create-hash');
 module.exports = function (seed, len) {
@@ -18809,7 +20729,7 @@ function i2ops(c) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":52,"create-hash":56}],128:[function(require,module,exports){
+},{"buffer":79,"create-hash":83}],155:[function(require,module,exports){
 (function (Buffer){
 var parseKeys = require('parse-asn1');
 var mgf = require('./mgf');
@@ -18920,7 +20840,7 @@ function compare(a, b){
   return dif;
 }
 }).call(this,require("buffer").Buffer)
-},{"./mgf":127,"./withPublic":130,"./xor":131,"bn.js":21,"browserify-rsa":44,"buffer":52,"create-hash":56,"parse-asn1":118}],129:[function(require,module,exports){
+},{"./mgf":154,"./withPublic":157,"./xor":158,"bn.js":45,"browserify-rsa":68,"buffer":79,"create-hash":83,"parse-asn1":145}],156:[function(require,module,exports){
 (function (Buffer){
 var parseKeys = require('parse-asn1');
 var randomBytes = require('randombytes');
@@ -19018,7 +20938,7 @@ function nonZero(len, crypto) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"./mgf":127,"./withPublic":130,"./xor":131,"bn.js":21,"browserify-rsa":44,"buffer":52,"create-hash":56,"parse-asn1":118,"randombytes":132}],130:[function(require,module,exports){
+},{"./mgf":154,"./withPublic":157,"./xor":158,"bn.js":45,"browserify-rsa":68,"buffer":79,"create-hash":83,"parse-asn1":145,"randombytes":159}],157:[function(require,module,exports){
 (function (Buffer){
 var bn = require('bn.js');
 function withPublic(paddedMsg, key) {
@@ -19031,7 +20951,7 @@ function withPublic(paddedMsg, key) {
 
 module.exports = withPublic;
 }).call(this,require("buffer").Buffer)
-},{"bn.js":21,"buffer":52}],131:[function(require,module,exports){
+},{"bn.js":45,"buffer":79}],158:[function(require,module,exports){
 module.exports = function xor(a, b) {
   var len = a.length;
   var i = -1;
@@ -19040,7 +20960,7 @@ module.exports = function xor(a, b) {
   }
   return a
 };
-},{}],132:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 (function (process,global){
 'use strict'
 
@@ -19082,7 +21002,7 @@ function randomBytes (size, cb) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":125,"safe-buffer":148}],133:[function(require,module,exports){
+},{"_process":152,"safe-buffer":175}],160:[function(require,module,exports){
 (function (process,global){
 'use strict'
 
@@ -19194,10 +21114,10 @@ function randomFillSync (buf, offset, size) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":125,"randombytes":132,"safe-buffer":148}],134:[function(require,module,exports){
+},{"_process":152,"randombytes":159,"safe-buffer":175}],161:[function(require,module,exports){
 module.exports = require('./lib/_stream_duplex.js');
 
-},{"./lib/_stream_duplex.js":135}],135:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":162}],162:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19322,7 +21242,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":137,"./_stream_writable":139,"core-util-is":54,"inherits":106,"process-nextick-args":124}],136:[function(require,module,exports){
+},{"./_stream_readable":164,"./_stream_writable":166,"core-util-is":81,"inherits":131,"process-nextick-args":151}],163:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19370,7 +21290,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":138,"core-util-is":54,"inherits":106}],137:[function(require,module,exports){
+},{"./_stream_transform":165,"core-util-is":81,"inherits":131}],164:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -20380,7 +22300,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":135,"./internal/streams/BufferList":140,"./internal/streams/destroy":141,"./internal/streams/stream":142,"_process":125,"core-util-is":54,"events":88,"inherits":106,"isarray":108,"process-nextick-args":124,"safe-buffer":148,"string_decoder/":158,"util":23}],138:[function(require,module,exports){
+},{"./_stream_duplex":162,"./internal/streams/BufferList":167,"./internal/streams/destroy":168,"./internal/streams/stream":169,"_process":152,"core-util-is":81,"events":75,"inherits":131,"isarray":133,"process-nextick-args":151,"safe-buffer":175,"string_decoder/":185,"util":47}],165:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20595,7 +22515,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":135,"core-util-is":54,"inherits":106}],139:[function(require,module,exports){
+},{"./_stream_duplex":162,"core-util-is":81,"inherits":131}],166:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -21262,7 +23182,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":135,"./internal/streams/destroy":141,"./internal/streams/stream":142,"_process":125,"core-util-is":54,"inherits":106,"process-nextick-args":124,"safe-buffer":148,"util-deprecate":159}],140:[function(require,module,exports){
+},{"./_stream_duplex":162,"./internal/streams/destroy":168,"./internal/streams/stream":169,"_process":152,"core-util-is":81,"inherits":131,"process-nextick-args":151,"safe-buffer":175,"util-deprecate":187}],167:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -21337,7 +23257,7 @@ module.exports = function () {
 
   return BufferList;
 }();
-},{"safe-buffer":148}],141:[function(require,module,exports){
+},{"safe-buffer":175}],168:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -21410,13 +23330,13 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":124}],142:[function(require,module,exports){
+},{"process-nextick-args":151}],169:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":88}],143:[function(require,module,exports){
+},{"events":75}],170:[function(require,module,exports){
 module.exports = require('./readable').PassThrough
 
-},{"./readable":144}],144:[function(require,module,exports){
+},{"./readable":171}],171:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -21425,13 +23345,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":135,"./lib/_stream_passthrough.js":136,"./lib/_stream_readable.js":137,"./lib/_stream_transform.js":138,"./lib/_stream_writable.js":139}],145:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":162,"./lib/_stream_passthrough.js":163,"./lib/_stream_readable.js":164,"./lib/_stream_transform.js":165,"./lib/_stream_writable.js":166}],172:[function(require,module,exports){
 module.exports = require('./readable').Transform
 
-},{"./readable":144}],146:[function(require,module,exports){
+},{"./readable":171}],173:[function(require,module,exports){
 module.exports = require('./lib/_stream_writable.js');
 
-},{"./lib/_stream_writable.js":139}],147:[function(require,module,exports){
+},{"./lib/_stream_writable.js":166}],174:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var inherits = require('inherits')
@@ -21726,7 +23646,7 @@ function fn5 (a, b, c, d, e, m, k, s) {
 module.exports = RIPEMD160
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":52,"hash-base":90,"inherits":106}],148:[function(require,module,exports){
+},{"buffer":79,"hash-base":116,"inherits":131}],175:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -21790,7 +23710,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":52}],149:[function(require,module,exports){
+},{"buffer":79}],176:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 
 // prototype class for hash functions
@@ -21873,7 +23793,7 @@ Hash.prototype._update = function () {
 
 module.exports = Hash
 
-},{"safe-buffer":148}],150:[function(require,module,exports){
+},{"safe-buffer":175}],177:[function(require,module,exports){
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
 
@@ -21890,7 +23810,7 @@ exports.sha256 = require('./sha256')
 exports.sha384 = require('./sha384')
 exports.sha512 = require('./sha512')
 
-},{"./sha":151,"./sha1":152,"./sha224":153,"./sha256":154,"./sha384":155,"./sha512":156}],151:[function(require,module,exports){
+},{"./sha":178,"./sha1":179,"./sha224":180,"./sha256":181,"./sha384":182,"./sha512":183}],178:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
  * in FIPS PUB 180-1
@@ -21986,7 +23906,7 @@ Sha.prototype._hash = function () {
 
 module.exports = Sha
 
-},{"./hash":149,"inherits":106,"safe-buffer":148}],152:[function(require,module,exports){
+},{"./hash":176,"inherits":131,"safe-buffer":175}],179:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
@@ -22087,7 +24007,7 @@ Sha1.prototype._hash = function () {
 
 module.exports = Sha1
 
-},{"./hash":149,"inherits":106,"safe-buffer":148}],153:[function(require,module,exports){
+},{"./hash":176,"inherits":131,"safe-buffer":175}],180:[function(require,module,exports){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
@@ -22142,7 +24062,7 @@ Sha224.prototype._hash = function () {
 
 module.exports = Sha224
 
-},{"./hash":149,"./sha256":154,"inherits":106,"safe-buffer":148}],154:[function(require,module,exports){
+},{"./hash":176,"./sha256":181,"inherits":131,"safe-buffer":175}],181:[function(require,module,exports){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
@@ -22279,7 +24199,7 @@ Sha256.prototype._hash = function () {
 
 module.exports = Sha256
 
-},{"./hash":149,"inherits":106,"safe-buffer":148}],155:[function(require,module,exports){
+},{"./hash":176,"inherits":131,"safe-buffer":175}],182:[function(require,module,exports){
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
 var Hash = require('./hash')
@@ -22338,7 +24258,7 @@ Sha384.prototype._hash = function () {
 
 module.exports = Sha384
 
-},{"./hash":149,"./sha512":156,"inherits":106,"safe-buffer":148}],156:[function(require,module,exports){
+},{"./hash":176,"./sha512":183,"inherits":131,"safe-buffer":175}],183:[function(require,module,exports){
 var inherits = require('inherits')
 var Hash = require('./hash')
 var Buffer = require('safe-buffer').Buffer
@@ -22600,7 +24520,7 @@ Sha512.prototype._hash = function () {
 
 module.exports = Sha512
 
-},{"./hash":149,"inherits":106,"safe-buffer":148}],157:[function(require,module,exports){
+},{"./hash":176,"inherits":131,"safe-buffer":175}],184:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22729,7 +24649,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":88,"inherits":106,"readable-stream/duplex.js":134,"readable-stream/passthrough.js":143,"readable-stream/readable.js":144,"readable-stream/transform.js":145,"readable-stream/writable.js":146}],158:[function(require,module,exports){
+},{"events":75,"inherits":131,"readable-stream/duplex.js":161,"readable-stream/passthrough.js":170,"readable-stream/readable.js":171,"readable-stream/transform.js":172,"readable-stream/writable.js":173}],185:[function(require,module,exports){
 'use strict';
 
 var Buffer = require('safe-buffer').Buffer;
@@ -23002,7 +24922,211 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":148}],159:[function(require,module,exports){
+},{"safe-buffer":175}],186:[function(require,module,exports){
+/*! https://mths.be/utf8js v3.0.0 by @mathias */
+;(function(root) {
+
+	var stringFromCharCode = String.fromCharCode;
+
+	// Taken from https://mths.be/punycode
+	function ucs2decode(string) {
+		var output = [];
+		var counter = 0;
+		var length = string.length;
+		var value;
+		var extra;
+		while (counter < length) {
+			value = string.charCodeAt(counter++);
+			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
+				// high surrogate, and there is a next character
+				extra = string.charCodeAt(counter++);
+				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
+					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
+				} else {
+					// unmatched surrogate; only append this code unit, in case the next
+					// code unit is the high surrogate of a surrogate pair
+					output.push(value);
+					counter--;
+				}
+			} else {
+				output.push(value);
+			}
+		}
+		return output;
+	}
+
+	// Taken from https://mths.be/punycode
+	function ucs2encode(array) {
+		var length = array.length;
+		var index = -1;
+		var value;
+		var output = '';
+		while (++index < length) {
+			value = array[index];
+			if (value > 0xFFFF) {
+				value -= 0x10000;
+				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
+				value = 0xDC00 | value & 0x3FF;
+			}
+			output += stringFromCharCode(value);
+		}
+		return output;
+	}
+
+	function checkScalarValue(codePoint) {
+		if (codePoint >= 0xD800 && codePoint <= 0xDFFF) {
+			throw Error(
+				'Lone surrogate U+' + codePoint.toString(16).toUpperCase() +
+				' is not a scalar value'
+			);
+		}
+	}
+	/*--------------------------------------------------------------------------*/
+
+	function createByte(codePoint, shift) {
+		return stringFromCharCode(((codePoint >> shift) & 0x3F) | 0x80);
+	}
+
+	function encodeCodePoint(codePoint) {
+		if ((codePoint & 0xFFFFFF80) == 0) { // 1-byte sequence
+			return stringFromCharCode(codePoint);
+		}
+		var symbol = '';
+		if ((codePoint & 0xFFFFF800) == 0) { // 2-byte sequence
+			symbol = stringFromCharCode(((codePoint >> 6) & 0x1F) | 0xC0);
+		}
+		else if ((codePoint & 0xFFFF0000) == 0) { // 3-byte sequence
+			checkScalarValue(codePoint);
+			symbol = stringFromCharCode(((codePoint >> 12) & 0x0F) | 0xE0);
+			symbol += createByte(codePoint, 6);
+		}
+		else if ((codePoint & 0xFFE00000) == 0) { // 4-byte sequence
+			symbol = stringFromCharCode(((codePoint >> 18) & 0x07) | 0xF0);
+			symbol += createByte(codePoint, 12);
+			symbol += createByte(codePoint, 6);
+		}
+		symbol += stringFromCharCode((codePoint & 0x3F) | 0x80);
+		return symbol;
+	}
+
+	function utf8encode(string) {
+		var codePoints = ucs2decode(string);
+		var length = codePoints.length;
+		var index = -1;
+		var codePoint;
+		var byteString = '';
+		while (++index < length) {
+			codePoint = codePoints[index];
+			byteString += encodeCodePoint(codePoint);
+		}
+		return byteString;
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	function readContinuationByte() {
+		if (byteIndex >= byteCount) {
+			throw Error('Invalid byte index');
+		}
+
+		var continuationByte = byteArray[byteIndex] & 0xFF;
+		byteIndex++;
+
+		if ((continuationByte & 0xC0) == 0x80) {
+			return continuationByte & 0x3F;
+		}
+
+		// If we end up here, it’s not a continuation byte
+		throw Error('Invalid continuation byte');
+	}
+
+	function decodeSymbol() {
+		var byte1;
+		var byte2;
+		var byte3;
+		var byte4;
+		var codePoint;
+
+		if (byteIndex > byteCount) {
+			throw Error('Invalid byte index');
+		}
+
+		if (byteIndex == byteCount) {
+			return false;
+		}
+
+		// Read first byte
+		byte1 = byteArray[byteIndex] & 0xFF;
+		byteIndex++;
+
+		// 1-byte sequence (no continuation bytes)
+		if ((byte1 & 0x80) == 0) {
+			return byte1;
+		}
+
+		// 2-byte sequence
+		if ((byte1 & 0xE0) == 0xC0) {
+			byte2 = readContinuationByte();
+			codePoint = ((byte1 & 0x1F) << 6) | byte2;
+			if (codePoint >= 0x80) {
+				return codePoint;
+			} else {
+				throw Error('Invalid continuation byte');
+			}
+		}
+
+		// 3-byte sequence (may include unpaired surrogates)
+		if ((byte1 & 0xF0) == 0xE0) {
+			byte2 = readContinuationByte();
+			byte3 = readContinuationByte();
+			codePoint = ((byte1 & 0x0F) << 12) | (byte2 << 6) | byte3;
+			if (codePoint >= 0x0800) {
+				checkScalarValue(codePoint);
+				return codePoint;
+			} else {
+				throw Error('Invalid continuation byte');
+			}
+		}
+
+		// 4-byte sequence
+		if ((byte1 & 0xF8) == 0xF0) {
+			byte2 = readContinuationByte();
+			byte3 = readContinuationByte();
+			byte4 = readContinuationByte();
+			codePoint = ((byte1 & 0x07) << 0x12) | (byte2 << 0x0C) |
+				(byte3 << 0x06) | byte4;
+			if (codePoint >= 0x010000 && codePoint <= 0x10FFFF) {
+				return codePoint;
+			}
+		}
+
+		throw Error('Invalid UTF-8 detected');
+	}
+
+	var byteArray;
+	var byteCount;
+	var byteIndex;
+	function utf8decode(byteString) {
+		byteArray = ucs2decode(byteString);
+		byteCount = byteArray.length;
+		byteIndex = 0;
+		var codePoints = [];
+		var tmp;
+		while ((tmp = decodeSymbol()) !== false) {
+			codePoints.push(tmp);
+		}
+		return ucs2encode(codePoints);
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	root.version = '3.0.0';
+	root.encode = utf8encode;
+	root.decode = utf8decode;
+
+}(typeof exports === 'undefined' ? this.utf8 = {} : exports));
+
+},{}],187:[function(require,module,exports){
 (function (global){
 
 /**
@@ -23073,144 +25197,4 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],160:[function(require,module,exports){
-var indexOf = require('indexof');
-
-var Object_keys = function (obj) {
-    if (Object.keys) return Object.keys(obj)
-    else {
-        var res = [];
-        for (var key in obj) res.push(key)
-        return res;
-    }
-};
-
-var forEach = function (xs, fn) {
-    if (xs.forEach) return xs.forEach(fn)
-    else for (var i = 0; i < xs.length; i++) {
-        fn(xs[i], i, xs);
-    }
-};
-
-var defineProp = (function() {
-    try {
-        Object.defineProperty({}, '_', {});
-        return function(obj, name, value) {
-            Object.defineProperty(obj, name, {
-                writable: true,
-                enumerable: false,
-                configurable: true,
-                value: value
-            })
-        };
-    } catch(e) {
-        return function(obj, name, value) {
-            obj[name] = value;
-        };
-    }
-}());
-
-var globals = ['Array', 'Boolean', 'Date', 'Error', 'EvalError', 'Function',
-'Infinity', 'JSON', 'Math', 'NaN', 'Number', 'Object', 'RangeError',
-'ReferenceError', 'RegExp', 'String', 'SyntaxError', 'TypeError', 'URIError',
-'decodeURI', 'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape',
-'eval', 'isFinite', 'isNaN', 'parseFloat', 'parseInt', 'undefined', 'unescape'];
-
-function Context() {}
-Context.prototype = {};
-
-var Script = exports.Script = function NodeScript (code) {
-    if (!(this instanceof Script)) return new Script(code);
-    this.code = code;
-};
-
-Script.prototype.runInContext = function (context) {
-    if (!(context instanceof Context)) {
-        throw new TypeError("needs a 'context' argument.");
-    }
-    
-    var iframe = document.createElement('iframe');
-    if (!iframe.style) iframe.style = {};
-    iframe.style.display = 'none';
-    
-    document.body.appendChild(iframe);
-    
-    var win = iframe.contentWindow;
-    var wEval = win.eval, wExecScript = win.execScript;
-
-    if (!wEval && wExecScript) {
-        // win.eval() magically appears when this is called in IE:
-        wExecScript.call(win, 'null');
-        wEval = win.eval;
-    }
-    
-    forEach(Object_keys(context), function (key) {
-        win[key] = context[key];
-    });
-    forEach(globals, function (key) {
-        if (context[key]) {
-            win[key] = context[key];
-        }
-    });
-    
-    var winKeys = Object_keys(win);
-
-    var res = wEval.call(win, this.code);
-    
-    forEach(Object_keys(win), function (key) {
-        // Avoid copying circular objects like `top` and `window` by only
-        // updating existing context properties or new properties in the `win`
-        // that was only introduced after the eval.
-        if (key in context || indexOf(winKeys, key) === -1) {
-            context[key] = win[key];
-        }
-    });
-
-    forEach(globals, function (key) {
-        if (!(key in context)) {
-            defineProp(context, key, win[key]);
-        }
-    });
-    
-    document.body.removeChild(iframe);
-    
-    return res;
-};
-
-Script.prototype.runInThisContext = function () {
-    return eval(this.code); // maybe...
-};
-
-Script.prototype.runInNewContext = function (context) {
-    var ctx = Script.createContext(context);
-    var res = this.runInContext(ctx);
-
-    forEach(Object_keys(ctx), function (key) {
-        context[key] = ctx[key];
-    });
-
-    return res;
-};
-
-forEach(Object_keys(Script.prototype), function (name) {
-    exports[name] = Script[name] = function (code) {
-        var s = Script(code);
-        return s[name].apply(s, [].slice.call(arguments, 1));
-    };
-});
-
-exports.createScript = function (code) {
-    return exports.Script(code);
-};
-
-exports.createContext = Script.createContext = function (context) {
-    var copy = new Context();
-    if(typeof context === 'object') {
-        forEach(Object_keys(context), function (key) {
-            copy[key] = context[key];
-        });
-    }
-    return copy;
-};
-
-},{"indexof":105}]},{},[1]);
+},{}]},{},[2]);

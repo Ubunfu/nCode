@@ -1,164 +1,4 @@
-/**
- * Base64 nCoder
- * Base64 encodes or decodes a string!
- *
- * @param {string} action The action to perform [encode/decode].
- * @param {string} input The string to transform.
- */
-function nCoderBase64(action, input) {
-    const utf8 = require('utf8');
-    const base64 = require('base-64');
-    var output;
-
-    switch (action) {
-    case 'encode':
-        output = base64.encode(utf8.encode(input));
-        break;
-    case 'decode':
-        output = utf8.decode(base64.decode(input));
-        break;
-    default:
-        output = '[ERROR] Invalid action.';
-        console.log('[ERROR] Invalid action.');
-        break;
-    }
-
-    console.log(output);
-    return output;
-}
-
-/**
-  * String to JSON
-  * Passively attempts to convert a string to a JSON object.
-  * If it fails, nothing is changed, and no error is thrown.
-  *
-  * @param {string} input Input to convert.
-  */
-function stringToJSON(input) {
-
-    console.log('Attempting to convert input from string to JSON object...');
-    var output;
-
-    try {
-        output = JSON.parse(input);
-        console.log('Result:' + output);
-    } catch (error) {
-        // Swallow the error
-        console.log('It didnt take, but whatever.');
-        output = input;
-    }
-
-    return output;
-    
-}
-
-/**
-  * JSON to String
-  * Passively attempts to convert a JSON object into a string.
-  * If it fails, nothing is changed, and no error is thrown.
-  *
-  * @param {string} input Input to convert.
-  */
-function jsonToString(input) {
-
-    console.log('Attempting to convert input from JSON object to string...');
-    var output;
-
-    try {
-        output = JSON.stringify(input, null, 4);
-        console.log('Result:' + output);
-    } catch (error) {
-        // Swallow the error
-        console.log('It didnt take, but whatever.');
-        output = input;
-    }
-
-    return output;
-    
-}
-
-/**
-  * JWT nCoder
-  * Encodes or decodes a JWT!
-  *
-  * @param {string} action The action to perform [encode/decode].
-  * @param {string} input The string to transform.
-  * @param {string} userSecret JWT secret.
-  * @param {boolean} ignoreSig If decoding, ignore signature validation?
-  */
-function nCoderJWT(action, input, userSecret, ignoreSig) {
-    var jwt = require('jwt-simple');
-    var secret = 'secret';
-    var output;
-
-    // Override secret if necessary
-    if (userSecret) {
-        secret = userSecret;
-    }
-
-    // Ignore the signature if desired
-    if (!ignoreSig) {
-        ignoreSig = false;
-    }
-
-    switch (action) {
-    case 'encode':
-        // This gives us back a JWT
-        console.log('Plaintext: ' + input);
-
-        // Try to convert the input into a JSON object
-        input = stringToJSON(input);
-
-        output = jwt.encode(input, secret);
-        console.log('Encoded JWT: ' + output);
-        break;
-    case 'decode':
-        // This gives us back a JSON payload
-        console.log('Encoded JWT: ' + input);
-
-        // If we have a validateSig flag, use it
-        output = jwt.decode(input, secret, ignoreSig);
-
-        // Try to convert the decoded JWT into a string
-        output = jsonToString(output);
-
-        console.log('Plaintext: ' + output);
-        break;
-    default:
-        output = '[ERROR] Invalid action.';
-        console.log('[ERROR] Invalid action.');
-        break;
-    }
-
-    return output;
-}
-
-/**
-  * Certificate nCoder
-  * Encodes or decodes a certificate!
-  *
-  * @param {string} action The action to perform [encode/decode].
-  * @param {string} input The string to transform.
-  */
-function nCoderCertificate(action, input) {
-
-    var output;
-    
-    switch (action) {
-    case 'encode':
-        output = 'encode ' + input;
-        break;
-    case 'decode':
-        output = 'decode ' + input;
-        break;
-    default:
-        output = '[ERROR] Invalid action.';
-        console.log('[ERROR] Invalid action.');
-        break;
-    }
-
-    return output;
-}
+var nCoders = require('./nCoders.js');
 
 /**
   * displayOutput
@@ -197,14 +37,14 @@ function setUiError(error, domObj) {
   * @param {string} type The type of object we're dealing with.
   * @param {string} input Input to transform.
   */
-function nCode(action, type, input) {
+async function nCode(action, type, input) {
     var output;
 
     switch (type) {
     case 'base64':
 
         // Run the base64 nCoder
-        output = nCoderBase64(action, input);
+        output = nCoders.nCoderBase64(action, input);
         break;
     case 'jwt':
         // Grab extra data we need to work with JWTs
@@ -213,10 +53,10 @@ function nCode(action, type, input) {
         console.log('ignoreSig?:' + ignoreSig);
 
         // Run the JWT nCoder
-        output = nCoderJWT(action, input, secret, ignoreSig);
+        output = nCoders.nCoderJWT(action, input, secret, ignoreSig);
         break;
     case 'certificate':
-        var output = nCoderCertificate(action, input);
+        var output = await nCoders.nCoderCertificate(action, input);
         break;
     default:
         console.log('[ERROR] Invalid input type.');
@@ -280,14 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    btnEncode.addEventListener('click', () => {
+    btnEncode.addEventListener('click', async () => {
         setUiError(false, 'output-field'); // Clear error class if set
 
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
         
         try {
-            var output = nCode('encode', type, input);
+            var output = await nCode('encode', type, input);
         } catch (error) {
             console.log(error);
             var output = error;
@@ -298,14 +138,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    btnDecode.addEventListener('click', () => {
+    btnDecode.addEventListener('click', async () => {
         setUiError(false, 'output-field'); // Clear error class if set
 
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
 
         try {
-            var output = nCode('decode', type, input);
+            var output = await nCode('decode', type, input);
+            console.log('rootOutput: ' + output);
+            if (JSON.parse(output).errorStatus) {
+                setUiError(true, 'output-field');
+            }
         } catch (error) {
             console.log(error);
             var output = error;

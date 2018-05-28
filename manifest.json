@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "nCode",
-  "version": "0.2",
-  "description": "Awesome encoding and decoding tool for developers!",
+  "version": "1.0",
+  "description": "nCode enables easy encoding / decoding of the following formats:\n *Base-64 \n *JWT \n\nSupport for PEM-formatted certificate decoding now available!",
   "icons": {
     "16": "img/icon-16.png",
     "48": "img/icon-48.png",

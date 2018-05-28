@@ -3,17 +3,28 @@
   "version": "0.2.0",
   "description": "Encoding and decoding tool for web developers.",
   "dependencies": {
+    "axios": "^0.18.0",
     "base-64": "^0.1.0",
     "jwt-simple": "^0.5.1",
-    "utf8": "^3.0.0",
-    "x509": "^0.3.3"
+    "utf8": "^3.0.0"
   },
   "devDependencies": {
-    "browserify": "^14.5.0",
-    "eslint": "^4.12.1",
-    "eslint-plugin-react": "^7.5.1",
+    "ava": "^1.0.0-beta.4",
+    "browserify": "^16.2.0",
+    "eslint": "^4.19.1",
     "gulp": "^3.9.1",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^2.0.0"
+  },
+  "scripts": {
+    "test": "ava"
+  },
+  "ava": {
+    "files": [
+      "test/*.js"
+    ],
+    "sources": [
+      "js/*.js"
+    ]
   },
   "repository": {
     "type": "git",
