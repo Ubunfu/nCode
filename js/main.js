@@ -37,7 +37,7 @@ function setUiError(error, domObj) {
   * @param {string} type The type of object we're dealing with.
   * @param {string} input Input to transform.
   */
-function nCode(action, type, input) {
+async function nCode(action, type, input) {
     var output;
 
     switch (type) {
@@ -56,7 +56,7 @@ function nCode(action, type, input) {
         output = nCoders.nCoderJWT(action, input, secret, ignoreSig);
         break;
     case 'certificate':
-        var output = nCoders.nCoderCertificate(action, input);
+        var output = await nCoders.nCoderCertificate(action, input);
         break;
     default:
         console.log('[ERROR] Invalid input type.');
@@ -120,14 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    btnEncode.addEventListener('click', () => {
+    btnEncode.addEventListener('click', async () => {
         setUiError(false, 'output-field'); // Clear error class if set
 
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
         
         try {
-            var output = nCode('encode', type, input);
+            var output = await nCode('encode', type, input);
         } catch (error) {
             console.log(error);
             var output = error;
@@ -138,14 +138,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    btnDecode.addEventListener('click', () => {
+    btnDecode.addEventListener('click', async () => {
         setUiError(false, 'output-field'); // Clear error class if set
 
         var type = document.getElementById('selector-types').value;
         var input = document.getElementById('input-field').value;
 
         try {
-            var output = nCode('decode', type, input);
+            var output = await nCode('decode', type, input);
+            console.log('rootOutput: ' + output);
+            if (JSON.parse(output).errorStatus) {
+                setUiError(true, 'output-field');
+            }
         } catch (error) {
             console.log(error);
             var output = error;
