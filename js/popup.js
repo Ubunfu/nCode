@@ -198,9 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             var output = await nCode('decode', type, input);
             console.log('rootOutput: ' + output);
-            if (JSON.parse(output).errorStatus) {
-                setUiError(true, 'output-field');
-            }
+            // if (JSON.parse(output).errorStatus) {
+            //     setUiError(true, 'output-field');
+            // }
         } catch (error) {
             console.log(error);
             var output = error;
