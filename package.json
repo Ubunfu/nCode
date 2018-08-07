@@ -1,6 +1,6 @@
 {
   "name": "ncode",
-  "version": "0.2.0",
+  "version": "1.0.1",
   "description": "Encoding and decoding tool for web developers.",
   "dependencies": {
     "axios": "^0.18.0",
