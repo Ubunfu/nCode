@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "nCode",
   "version": "1.0.1",
-  "description": "nCode enables easy encoding / decoding of the following formats:\n *Base-64 \n *JWT \n\nSupport for PEM-formatted certificate decoding now available!",
+  "description": "nCode enables easy encoding / decoding:\n *Base-64 \n *JWT \n\nSupport for PEM certificate decoding is here!",
   "icons": {
     "16": "img/icon-16.png",
     "48": "img/icon-48.png",
