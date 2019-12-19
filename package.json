@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "Encoding and decoding tool for web developers.",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "base-64": "^0.1.0",
     "jwt-simple": "^0.5.1",
     "utf8": "^3.0.0"
